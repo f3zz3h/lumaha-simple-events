@@ -52,6 +52,30 @@ fields, all dates moved, no bookings, and the year in the title updated. Check i
 **Print the register.** Events → Attendees, pick the event, **Printable register** (sorted by surname,
 one table per ticket, with a tick column), or **Download CSV** for a spreadsheet.
 
+## Moving from EventPrime
+
+Run this with WP-CLI, on a staging copy first:
+
+```sh
+wp lset migrate-eventprime --dry-run                      # what it would do; saves nothing
+wp lset migrate-eventprime --report=/tmp/lset-report.csv  # the real run
+```
+
+It copies venues, checkout fields, events, ticket categories (as ticket groups), tickets,
+bookings and attendee names. It only reads EventPrime's data and never changes it or any
+WooCommerce order. Each copy remembers its EventPrime id, so running it again updates what it
+made last time rather than making duplicates. `--from=2026-01-01` limits it to events from
+that date.
+
+At the end it prints, for every ticket, how many EventPrime says it sold and how many the new
+bookings add up to, plus any warnings (for example dates where EventPrime's own timestamp is
+an hour out, or bookings with no Woo order). The dry run needs InnoDB tables, which is the
+WordPress default.
+
+Old orders keep their EventPrime line details. With EventPrime switched off, those show as
+"Tickets: 2 × Child"; copied bookings follow their order if it's later cancelled or refunded.
+Links in the old `/events/?event=123` form redirect to the copied event.
+
 ## Development
 
 Needs PHP 7.4+, Composer, and MySQL/MariaDB.
