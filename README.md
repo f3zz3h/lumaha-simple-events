@@ -54,6 +54,12 @@ one table per ticket, with a tick column), or **Download CSV** for a spreadsheet
 
 ## Moving from EventPrime
 
+The migration is a separate, one-off plugin, **Lumaha Simple Event Tickets: EventPrime
+Migrator** (`addons/lumaha-set-eventprime-migrator`, released as its own
+`lumaha-set-eventprime-migrator-<version>.zip`). It isn't part of the main plugin. Install and
+activate it next to the main plugin, run the command, check the result, then deactivate and
+delete it. The copied events and bookings stay.
+
 Run this with WP-CLI, on a staging copy first:
 
 ```sh
@@ -72,8 +78,9 @@ bookings add up to, plus any warnings (for example dates where EventPrime's own 
 an hour out, or bookings with no Woo order). The dry run needs InnoDB tables, which is the
 WordPress default.
 
-Old orders keep their EventPrime line details. With EventPrime switched off, those show as
-"Tickets: 2 × Child"; copied bookings follow their order if it's later cancelled or refunded.
+These stay in the main plugin, because they matter after the migrator is gone: old orders keep
+their EventPrime line details, and with EventPrime switched off those show as
+"Tickets: 2 × Child". Copied bookings follow their order if it's later cancelled or refunded.
 Links in the old `/events/?event=123` form redirect to the copied event.
 
 ## Development

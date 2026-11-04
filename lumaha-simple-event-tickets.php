@@ -49,7 +49,6 @@ require_once LSET_DIR . 'includes/class-lset-frontend.php';
 require_once LSET_DIR . 'includes/class-lset-cart.php';
 require_once LSET_DIR . 'includes/class-lset-orders.php';
 require_once LSET_DIR . 'includes/class-lset-attendees.php';
-require_once LSET_DIR . 'includes/class-lset-migrate.php';
 
 /**
  * Small entry point. VERSION is read by the release build and the GitHub updater.
@@ -84,7 +83,6 @@ final class Lumaha_Simple_Event_Tickets {
 		LSET_Cart::init();
 		LSET_Orders::init();
 		LSET_Attendees::init();
-		LSET_Migrate::register();
 		add_action( 'init', function () {
 			load_plugin_textdomain( 'lumaha-simple-event-tickets', false, dirname( plugin_basename( LSET_PLUGIN_FILE ) ) . '/languages' );
 		}, 1 );

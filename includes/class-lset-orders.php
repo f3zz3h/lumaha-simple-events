@@ -51,7 +51,8 @@ class LSET_Orders {
 				}
 			} elseif ( 'ep_tickets_data' === $m->key ) {
 				$lines = array();
-				$data  = LSET_Migrate::decode( $m->value );
+				$data  = is_array( $m->value ) ? $m->value : json_decode( (string) $m->value, true );
+				$data  = null === $data ? maybe_unserialize( $m->value ) : $data;
 				foreach ( is_array( $data ) ? $data : array() as $t ) {
 					if ( is_array( $t ) && isset( $t['name'] ) && is_scalar( $t['name'] ) ) {
 						$qty     = isset( $t['qty'] ) ? (int) $t['qty'] : 1;

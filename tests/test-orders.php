@@ -147,4 +147,21 @@ class LSET_Test_Orders extends LSET_Test_Case {
 		$this->assertSame( '0', $wpdb->get_var( 'SELECT COUNT(*) FROM ' . LSET_Install::table( 'holds' ) ) );
 		$this->assertSame( 0, $this->left( $e, $t ), 'still taken, now by the pending booking' );
 	}
+
+	public function test_old_eventprime_order_lines_show_readably() {
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_name( 'Summer Fair 2026' );
+		$item->set_quantity( 1 );
+		$item->add_meta_data( 'ep_booking_id', 999, true );
+		$item->add_meta_data( 'ep_tickets_data', wp_json_encode( array( array( 'id' => 10, 'name' => 'Child', 'qty' => 2 ), array( 'id' => 11, 'name' => 'Adult', 'qty' => 1 ) ) ), true );
+		$order->add_item( $item );
+		$order->save();
+
+		$item = current( wc_get_order( $order->get_id() )->get_items() );
+		$meta = wp_list_pluck( $item->get_formatted_meta_data(), 'display_value', 'display_key' );
+		$this->assertSame( '2 × Child, 1 × Adult', $meta['Tickets'] );
+		$this->assertArrayNotHasKey( 'ep_booking_id', $meta ); // Hidden outside the admin.
+		$this->assertArrayNotHasKey( 'EventPrime booking', $meta );
+	}
 }

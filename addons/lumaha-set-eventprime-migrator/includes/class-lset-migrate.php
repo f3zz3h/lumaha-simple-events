@@ -10,7 +10,7 @@
  * --dry-run does the whole run inside a database transaction and rolls it back, so the
  * report is exactly what a real run would do.
  *
- * @package Lumaha_Simple_Event_Tickets
+ * @package Lumaha_SET_EventPrime_Migrator
  */
 
 defined( 'ABSPATH' ) || exit;

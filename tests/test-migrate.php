@@ -1,6 +1,7 @@
 <?php
 /**
- * wp lset migrate-eventprime, run against a small fake EventPrime install.
+ * The EventPrime migrator add-on (addons/lumaha-set-eventprime-migrator), run against a small
+ * fake EventPrime install.
  *
  * @package Lumaha_Simple_Event_Tickets
  */
@@ -279,13 +280,5 @@ class LSET_Test_Migrate extends LSET_Test_Case {
 		$paid = array_values( array_filter( $this->bookings(), function ( $r ) { return (int) $r['order_id'] === $this->order_id; } ) );
 		$this->assertSame( 'refunded', $paid[0]['status'] );
 		$this->assertSame( 40, $this->left( $id, $tickets['Child']['id'] ) );
-	}
-
-	public function test_old_order_lines_show_readably() {
-		$item = current( wc_get_order( $this->order_id )->get_items() );
-		$meta = wp_list_pluck( $item->get_formatted_meta_data(), 'display_value', 'display_key' );
-		$this->assertSame( '2 × Child, 1 × Adult', $meta['Tickets'] );
-		$this->assertArrayNotHasKey( 'ep_booking_id', $meta ); // Hidden outside the admin.
-		$this->assertArrayNotHasKey( 'EventPrime booking', $meta );
 	}
 }
