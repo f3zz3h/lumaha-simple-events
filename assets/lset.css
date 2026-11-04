@@ -1,0 +1,49 @@
+/* Lumaha Simple Event Tickets: plain, themable, mobile first.
+ * Colours come from the theme (currentColor / inherit); override .lset-* classes to restyle. */
+.lset-events { display: grid; gap: 1.25rem; grid-template-columns: 1fr; margin: 0 0 1.5rem; }
+@media (min-width: 640px) { .lset-events { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .lset-events { grid-template-columns: repeat(3, 1fr); } }
+.lset-card { display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,.12); border-radius: 8px; overflow: hidden; background: inherit; }
+.lset-card__media { display: block; aspect-ratio: 16 / 9; overflow: hidden; }
+.lset-card__img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lset-card__body { padding: 1rem; display: flex; flex-direction: column; gap: .35rem; flex: 1; }
+.lset-card__title { margin: 0; font-size: 1.2em; line-height: 1.25; }
+.lset-card__title a { text-decoration: none; color: inherit; }
+.lset-card__when, .lset-card__venue, .lset-card__excerpt { margin: 0; }
+.lset-card__venue { opacity: .8; }
+.lset-card__foot { margin: auto 0 0; padding-top: .5rem; display: flex; align-items: center; justify-content: space-between; gap: .5rem; flex-wrap: wrap; }
+.lset-card__price { font-weight: 600; }
+.lset-button { display: inline-block; padding: .55em 1.1em; border-radius: 4px; background: #1d4f91; color: #fff !important; text-decoration: none; border: 0; cursor: pointer; font: inherit; line-height: 1.3; }
+.lset-button:hover, .lset-button:focus { filter: brightness(1.1); }
+.lset-button[disabled] { opacity: .5; cursor: not-allowed; }
+
+.lset-details { margin: 0 0 1.25rem; }
+.lset-details p { margin: 0 0 .35rem; }
+.lset-label { font-weight: 600; margin-right: .35em; }
+
+.lset-box { border: 1px solid rgba(0,0,0,.15); border-radius: 8px; padding: 1rem; margin: 1.5rem 0; }
+.lset-box__title { margin: 0 0 .75rem; font-size: 1.3em; }
+.lset-box--closed p { margin: 0; }
+.lset-status:empty { display: none; }
+.lset-status { margin: 0 0 .75rem; font-weight: 600; }
+.lset-ticket { display: grid; grid-template-columns: 1fr auto; gap: .5rem 1rem; align-items: center; padding: .75rem 0; border-top: 1px solid rgba(0,0,0,.08); }
+.lset-ticket:first-child { border-top: 0; }
+.lset-ticket.is-off { opacity: .6; }
+.lset-ticket__info { display: flex; flex-direction: column; gap: .15rem; }
+.lset-ticket__name { font-weight: 600; }
+.lset-ticket__desc { font-size: .9em; opacity: .85; }
+.lset-ticket__left:empty { display: none; }
+.lset-ticket__left { font-size: .9em; font-weight: 600; }
+.lset-qty { min-width: 4.5em; padding: .4em; font-size: 1rem; }
+.lset-attendees { grid-column: 1 / -1; }
+.lset-attendee, .lset-booking-fields { border: 1px solid rgba(0,0,0,.1); border-radius: 6px; padding: .75rem; margin: .5rem 0 0; }
+.lset-attendee legend, .lset-booking-fields legend { font-weight: 600; padding: 0 .25rem; }
+.lset-names { display: grid; grid-template-columns: 1fr; gap: 0 .75rem; }
+@media (min-width: 480px) { .lset-names { grid-template-columns: 1fr 1fr; } }
+.lset-field { margin: 0 0 .6rem; }
+.lset-field label { display: block; margin-bottom: .2rem; }
+.lset-field--checkbox label { display: flex; gap: .5em; align-items: flex-start; }
+.lset-field input[type=text], .lset-field input[type=number], .lset-field select, .lset-field textarea { width: 100%; box-sizing: border-box; padding: .45em; font-size: 1rem; }
+.lset-submit { margin: 1rem 0 0; }
+.lset-add { width: 100%; font-size: 1.05em; padding: .75em 1em; }
+@media (min-width: 640px) { .lset-add { width: auto; } }

@@ -1,0 +1,95 @@
+name: PHP checks
+run-name: PHP checks on ${{ github.ref_name }} by ${{ github.actor }}
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  syntax:
+    name: PHP ${{ matrix.php }} syntax
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 7.4 is the plugin's minimum ("Requires PHP").
+        php: ['7.4', '8.0', '8.3']
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v7
+
+      - name: Set up PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: none
+
+      - name: Check PHP syntax
+        run: |
+          status=0
+          while IFS= read -r -d '' file; do
+            php -l "$file" > /dev/null || status=1
+          done < <(find . -name '*.php' -not -path './.git/*' -not -path './vendor/*' -print0)
+          exit $status
+
+  phpunit:
+    name: PHPUnit (PHP ${{ matrix.php }}, WooCommerce ${{ matrix.wc }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '8.3'
+            wc: 'latest'
+          - php: '7.4'
+            wc: '9.9.5'
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v7
+
+      - name: Set up PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli
+          coverage: none
+          tools: composer, wp-cli
+
+      - name: Install test tools
+        run: composer install --no-interaction --no-progress
+
+      - name: Download WordPress and WooCommerce
+        run: |
+          wp core download --path=/tmp/wordpress --quiet
+          if [ "${{ matrix.wc }}" = latest ]; then url=https://downloads.wordpress.org/plugin/woocommerce.zip; else url=https://downloads.wordpress.org/plugin/woocommerce.${{ matrix.wc }}.zip; fi
+          curl -sSL -o /tmp/wc.zip "$url"
+          unzip -q /tmp/wc.zip -d /tmp
+
+      - name: Run tests
+        run: vendor/bin/phpunit
+        env:
+          WP_CORE_DIR: /tmp/wordpress
+          WC_DIR: /tmp/woocommerce
+          WP_TESTS_DB_NAME: wordpress_test
+          WP_TESTS_DB_USER: root
+          WP_TESTS_DB_PASS: root
+          WP_TESTS_DB_HOST: 127.0.0.1
