@@ -1,0 +1,26 @@
+.lset-grid { display: flex; flex-wrap: wrap; gap: 0 2rem; }
+.lset-time { width: 8.5em; }
+.lset-tickets td { vertical-align: top; }
+.lset-tickets input[type=text], .lset-tickets textarea { width: 100%; }
+.lset-w-name { min-width: 12em; }
+.lset-w-num { min-width: 5em; }
+.lset-sale input[type=datetime-local] { min-width: 13em; }
+.lset-w-num { width: 6em; }
+.lset-w-tiny { width: 4.5em; }
+.lset-w-group { width: 9em; min-width: 8em; }
+.lset-small { display: block; font-size: 12px; color: #646970; margin-top: 4px; }
+span.lset-small { display: inline; }
+.lset-col-sort { width: 20px; }
+.lset-handle { cursor: move; font-size: 16px; color: #8c8f94; }
+.lset-ticket.is-deleted { opacity: .35; }
+.lset-ticket.is-dragging { opacity: .5; }
+.lset-sale-date, .lset-sale-days { display: none; margin-top: 4px; }
+.lset-ticket[data-mode=date] .lset-sale-date, .lset-ticket[data-mode=days] .lset-sale-days { display: block; }
+.lset-groups { max-width: 480px; }
+.lset-fields-pick { max-width: 720px; }
+.lset-filter { margin: 1em 0; }
+.lset-scroll { overflow-x: auto; }
+.lset-list td, .lset-list th { white-space: nowrap; }
+.lset-refunded td { text-decoration: line-through; color: #8c8f94; }
+.lset-summary { max-width: 900px; margin-bottom: 1em; }
+.lset-summary__group td { background: #f6f7f7; }

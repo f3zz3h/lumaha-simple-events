@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<phpunit
+	bootstrap="tests/bootstrap.php"
+	colors="true"
+	beStrictAboutTestsThatDoNotTestAnything="true"
+	convertDeprecationsToExceptions="false"
+>
+	<testsuites>
+		<testsuite name="lset">
+			<directory prefix="test-" suffix=".php">tests</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>

@@ -1,0 +1,6 @@
+dist/
+.vscode/
+/vendor/
+.phpunit.result.cache
+/.wp-env.override.json
+composer.lock

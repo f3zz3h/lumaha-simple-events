@@ -1,0 +1,17 @@
+.git
+.github
+.gitignore
+.gitattributes
+.distignore
+.vscode
+/tests
+/vendor
+/bin
+composer.json
+composer.lock
+phpunit.xml.dist
+.wp-env.json
+/docs
+dist/
+
+/dist
