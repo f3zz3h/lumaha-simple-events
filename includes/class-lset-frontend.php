@@ -410,6 +410,17 @@ class LSET_Frontend {
 	 * @param array $e         Event.
 	 * @param array $exclude   Basket holds to leave out.
 	 */
+	/** Why nothing can be booked: not on sale yet (with the date), else the event's own message or a general one. */
+	private static function closed_message( array $e, array $rows ) {
+		$states = array_unique( wp_list_pluck( $rows, 'state' ) );
+		$start  = LSET_Store::sale_start( null, $e );
+		if ( $start && in_array( 'not_yet', $states, true ) ) {
+			/* translators: %s: date and time */
+			return sprintf( __( 'Tickets go on sale on %s.', 'lumaha-simple-event-tickets' ), LSET_Time::format( $start, get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $e['tz'] ) );
+		}
+		return $e['closed_msg'] ? $e['closed_msg'] : __( 'Bookings for this event are closed or sold out.', 'lumaha-simple-event-tickets' );
+	}
+
 	public static function availability( array $e, array $exclude = array() ) {
 		$tickets = LSET_Store::tickets( $e['id'], false );
 		$left    = LSET_Capacity::left( $e['id'], $exclude );
@@ -446,7 +457,7 @@ class LSET_Frontend {
 			'event'   => $e['id'],
 			'open'    => $any,
 			'tickets' => (object) $out,
-			'message' => $any ? '' : ( $e['closed_msg'] ? $e['closed_msg'] : __( 'Bookings for this event are closed or sold out.', 'lumaha-simple-event-tickets' ) ),
+			'message' => $any ? '' : self::closed_message( $e, $out ),
 		);
 	}
 }

@@ -106,4 +106,15 @@ class LSET_Test_Cart extends LSET_Test_Case {
 		WC()->cart->remove_cart_item( $keys[0] );
 		$this->assertSame( 3, $this->left( $e, $t ) );
 	}
+
+	public function test_not_yet_on_sale_says_when() {
+		$e = $this->event( '2030-07-03 12:00:00', '2030-07-03 15:00:00' );
+		LSET_Store::save_sale_window( $e, 'date', '2030-06-01 09:00:00', null, '' );
+		$this->ticket( $e );
+		update_option( 'date_format', 'j F Y' );
+		update_option( 'time_format', 'H:i' );
+		$a = LSET_Frontend::availability( LSET_Store::event( $e ) );
+		$this->assertFalse( $a['open'] );
+		$this->assertSame( 'Tickets go on sale on 1 June 2030 09:00.', $a['message'] );
+	}
 }
