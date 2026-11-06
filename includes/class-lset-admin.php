@@ -764,11 +764,34 @@ class LSET_Admin {
 								<a href="<?php echo esc_url( get_permalink( $page ) ); ?>"><?php echo esc_html( get_the_title( $page ) ); ?></a>
 								(<a href="<?php echo esc_url( get_edit_post_link( $page ) ); ?>"><?php esc_html_e( 'edit', 'lumaha-simple-event-tickets' ); ?></a>)
 							<?php else : ?>
+								<?php $clash = self::page_in_the_way( $key ); ?>
 								<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 									<input type="hidden" name="action" value="lset_create_page">
 									<input type="hidden" name="list" value="<?php echo esc_attr( $key ); ?>">
 									<?php wp_nonce_field( 'lset_create_page' ); ?>
-									<?php /* translators: %s: page title */ submit_button( sprintf( __( 'Create "%s" page', 'lumaha-simple-event-tickets' ), $def['title'] ), 'secondary small', 'submit', false ); ?>
+									<?php if ( $clash ) : ?>
+										<p>
+											<?php
+											printf(
+												/* translators: 1: page address, 2: page title with an edit link */
+												esc_html__( 'There is already a page at %1$s: %2$s.', 'lumaha-simple-event-tickets' ),
+												'<code>/' . esc_html( get_page_uri( $clash ) ) . '/</code>',
+												'<a href="' . esc_url( get_edit_post_link( $clash ) ) . '">' . esc_html( get_the_title( $clash ) ) . '</a>'
+											);
+											?>
+										</p>
+										<button type="submit" name="mode" value="replace" class="button button-small" onclick="return confirm(<?php echo esc_attr( wp_json_encode( __( 'Move the existing page to Drafts (its address gets "-old" on the end) and put the new list at its address?', 'lumaha-simple-event-tickets' ) ) ); ?>);">
+											<?php esc_html_e( 'Replace it (move the old page to Drafts)', 'lumaha-simple-event-tickets' ); ?>
+										</button>
+										<button type="submit" name="mode" value="new" class="button button-small">
+											<?php
+											/* translators: %s: page address such as /events-2/ */
+											printf( esc_html__( 'Keep it, create the new page at %s', 'lumaha-simple-event-tickets' ), '<code>/' . esc_html( wp_unique_post_slug( get_post_field( 'post_name', $clash ), 0, 'publish', 'page', 0 ) ) . '/</code>' );
+											?>
+										</button>
+									<?php else : ?>
+										<?php /* translators: %s: page title */ submit_button( sprintf( __( 'Create "%s" page', 'lumaha-simple-event-tickets' ), $def['title'] ), 'secondary small', 'submit', false ); ?>
+									<?php endif; ?>
 								</form>
 							<?php endif; ?>
 						</td>
@@ -830,6 +853,21 @@ class LSET_Admin {
 		return 0;
 	}
 
+	/** A top-level page (not in the bin) already using the address the new list page would get. Returns its id or 0. */
+	public static function page_in_the_way( $key ) {
+		global $wpdb;
+		$pages = self::listing_pages();
+		if ( ! isset( $pages[ $key ] ) ) {
+			return 0;
+		}
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT ID FROM {$wpdb->posts} WHERE post_type = 'page' AND post_parent = 0 AND post_name = %s AND post_status NOT IN ( 'trash', 'auto-draft', 'inherit' ) ORDER BY ID LIMIT 1",
+				sanitize_title( $pages[ $key ]['title'] )
+			)
+		);
+	}
+
 	public static function handle_create_page() {
 		check_admin_referer( 'lset_create_page' );
 		if ( ! current_user_can( 'manage_woocommerce' ) || ! current_user_can( 'publish_pages' ) ) {
@@ -840,22 +878,52 @@ class LSET_Admin {
 		if ( ! isset( $pages[ $key ] ) ) {
 			wp_die( esc_html__( 'Unknown list.', 'lumaha-simple-event-tickets' ) );
 		}
+		$mode = isset( $_POST['mode'] ) ? sanitize_key( wp_unslash( $_POST['mode'] ) ) : '';
+		self::create_listing_page( $key, $mode );
+		wp_safe_redirect( admin_url( 'edit.php?post_type=' . LSET_CPT . '&page=lset-settings&lset_msg=page_created#lset-pages' ) );
+		exit;
+	}
+
+	/**
+	 * Make the list page, or find the one there is. When another page has its address, $mode 'replace'
+	 * moves that page to Drafts first; anything else gives the new page the next free address (events-2).
+	 *
+	 * @return int Page id, or 0.
+	 */
+	public static function create_listing_page( $key, $mode = '' ) {
+		$pages = self::listing_pages();
+		if ( ! isset( $pages[ $key ] ) ) {
+			return 0;
+		}
+		$def = $pages[ $key ];
 		$id = self::listing_page( $key );
 		if ( ! $id ) {
+			$clash = self::page_in_the_way( $key );
+			$slug  = sanitize_title( $def['title'] );
+			if ( $clash && 'replace' === $mode && current_user_can( 'edit_post', $clash ) ) {
+				// Move it aside, not away: a draft keeps its content and can be published again.
+				wp_update_post(
+					array(
+						'ID'          => $clash,
+						'post_status' => 'draft',
+						'post_name'   => wp_unique_post_slug( $slug . '-old', $clash, 'publish', 'page', 0 ),
+					)
+				);
+			}
 			$id = wp_insert_post(
 				array(
 					'post_type'    => 'page',
 					'post_status'  => 'publish',
-					'post_title'   => $pages[ $key ]['title'],
-					'post_content' => '<!-- wp:shortcode -->' . $pages[ $key ]['shortcode'] . '<!-- /wp:shortcode -->',
+					'post_name'    => $slug,
+					'post_title'   => $def['title'],
+					'post_content' => '<!-- wp:shortcode -->' . $def['shortcode'] . '<!-- /wp:shortcode -->',
 				)
 			);
 		}
 		if ( $id && ! is_wp_error( $id ) ) {
 			update_option( 'lset_page_' . $key, (int) $id );
 		}
-		wp_safe_redirect( admin_url( 'edit.php?post_type=' . LSET_CPT . '&page=lset-settings&lset_msg=page_created#lset-pages' ) );
-		exit;
+		return $id && ! is_wp_error( $id ) ? (int) $id : 0;
 	}
 
 	public static function handle_save_settings() {

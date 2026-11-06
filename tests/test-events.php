@@ -176,4 +176,27 @@ class LSET_Test_Events extends LSET_Test_Case {
 		$this->assertSame( 'Previous event', LSET_Frontend::event_nav_text( 'Previous post', 'Previous post', 'twentytwentyone' ) );
 		$this->assertSame( 'Other', LSET_Frontend::event_nav_text( 'Other', 'Other', 'xpro' ) );
 	}
+
+	public function test_event_page_next_to_an_existing_page() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$old = self::factory()->post->create( array( 'post_type' => 'page', 'post_title' => 'Events', 'post_name' => 'events', 'post_content' => '[em_events]' ) );
+		$this->assertSame( $old, LSET_Admin::page_in_the_way( 'upcoming' ) );
+
+		// Keep it: the new page gets the next free address.
+		$new = LSET_Admin::create_listing_page( 'upcoming' );
+		$this->assertSame( 'events-2', get_post_field( 'post_name', $new ) );
+		$this->assertSame( 'publish', get_post_status( $old ) );
+	}
+
+	public function test_event_page_replaces_an_existing_page() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$old = self::factory()->post->create( array( 'post_type' => 'page', 'post_title' => 'Events', 'post_name' => 'events', 'post_content' => '[em_events]' ) );
+
+		$new = LSET_Admin::create_listing_page( 'upcoming', 'replace' );
+		$this->assertSame( 'events', get_post_field( 'post_name', $new ) );
+		$this->assertSame( 'draft', get_post_status( $old ) );
+		$this->assertSame( 'events-old', get_post_field( 'post_name', $old ) );
+		$this->assertSame( '[em_events]', get_post_field( 'post_content', $old ) );
+		$this->assertSame( 0, LSET_Admin::page_in_the_way( 'past' ) );
+	}
 }
