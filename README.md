@@ -29,6 +29,9 @@ WordPress and WooCommerce, no build step, no licence server.
   capability (admins and shop managers have it; give it to others with the Members plugin).
 - **Caching-safe**: event pages hold no counts or nonces; live availability comes from
   `/wp-json/lset/v1/availability/<event>` (sent with `no-store`).
+- **Photo gallery** (optional, the *Photo gallery* box on each event): pick photos from the media library and
+  drag to reorder. They appear at the bottom of the event page once the event has finished, with a
+  full-screen viewer, and the event's card on the Past events list says **See photos**.
 - Old EventPrime links (`/events/?event=123`) redirect to the migrated event.
 - Updates come from this repo's GitHub releases.
 
@@ -39,6 +42,7 @@ WordPress and WooCommerce, no build step, no licence server.
 | `[lset_events]` | Upcoming events, soonest first: image, date, venue, price, Book button. `limit="6"` shows only the next 6. |
 | `[lset_events past="1"]` | Past events only, newest first. Add `upcoming="1"` for both; `order="asc"` or `"desc"` to change the order. |
 | `[lset_event id="123"]` | One event's details and booking box, for an Elementor page. `details="0"` for just the booking box. |
+| `[lset_gallery id="123"]` | One event's photo gallery, once the event has finished. `any="1"` shows it straight away. |
 
 Each event also has its own page at `/events/<event-name>/` (the slug is a setting).
 
@@ -55,6 +59,10 @@ Set *Tickets on sale* if they shouldn't go on sale straight away. Add tickets in
 **Make next year's event.** Events → All events, hover the event, **Duplicate for next year**. Choose
 "same date" or "same weekday" (52 weeks later). The copy is a draft with the same tickets, groups and
 fields, all dates moved, no bookings, and the year in the title updated. Check it and publish.
+
+**Add photos after an event.** Open the event, scroll to *Photo gallery*, **Add photos**, pick or upload
+them, drag them into order, and Update. Photos are ordinary media library images, so anyone with
+a photo's link can open it. A password for the gallery can be added later (the `lset_gallery_can_view` filter).
 
 **Print the register.** Events → Attendees, pick the event, **Printable register** (sorted by surname,
 one table per ticket, with a tick column), or **Download CSV** for a spreadsheet.

@@ -46,6 +46,7 @@ require_once LSET_DIR . 'includes/class-lset-capacity.php';
 require_once LSET_DIR . 'includes/class-lset-events.php';
 require_once LSET_DIR . 'includes/class-lset-admin.php';
 require_once LSET_DIR . 'includes/class-lset-frontend.php';
+require_once LSET_DIR . 'includes/class-lset-gallery.php';
 require_once LSET_DIR . 'includes/class-lset-cart.php';
 require_once LSET_DIR . 'includes/class-lset-orders.php';
 require_once LSET_DIR . 'includes/class-lset-attendees.php';
@@ -79,6 +80,7 @@ final class Lumaha_Simple_Event_Tickets {
 		LSET_Events::init();
 		LSET_Admin::init();
 		LSET_Frontend::init();
+		LSET_Gallery::init();
 		LSET_Cart::init();
 		LSET_Orders::init();
 		LSET_Attendees::init();

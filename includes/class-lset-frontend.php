@@ -182,8 +182,14 @@ class LSET_Frontend {
 			if ( $price ) {
 				$html .= '<span class="lset-card__price">' . esc_html( $price ) . '</span> ';
 			}
-			$label = $e['bookings'] && ! self::is_past( $e ) ? __( 'Book', 'lumaha-simple-event-tickets' ) : __( 'More info', 'lumaha-simple-event-tickets' );
-			$html .= '<a class="lset-button" href="' . esc_url( $e['url'] ) . '">' . esc_html( $label ) . '</a></p>';
+			$href  = $e['url'];
+			if ( LSET_Gallery::is_visible( $e ) ) {
+				$label = __( 'See photos', 'lumaha-simple-event-tickets' );
+				$href .= '#lset-photos';
+			} else {
+				$label = $e['bookings'] && ! self::is_past( $e ) ? __( 'Book', 'lumaha-simple-event-tickets' ) : __( 'More info', 'lumaha-simple-event-tickets' );
+			}
+			$html .= '<a class="lset-button" href="' . esc_url( $href ) . '">' . esc_html( $label ) . '</a></p>';
 			$html .= '</div></article>';
 		}
 		$html .= '</div>';
@@ -202,7 +208,7 @@ class LSET_Frontend {
 		if ( ! $e ) {
 			return $content;
 		}
-		return self::details( $e ) . $content . self::booking_box( $e );
+		return self::details( $e ) . $content . self::booking_box( $e ) . LSET_Gallery::for_event_page( $e );
 	}
 
 	public static function shortcode_event( $atts ) {
