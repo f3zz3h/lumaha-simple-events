@@ -366,7 +366,8 @@ class LSET_Migrate {
 
 	/**
 	 * EventPrime's date + time text → local "Y-m-d H:i:s". The date may be Y-m-d, d/m/Y or a
-	 * Unix timestamp of the day; the time "6:00 PM" or "18:00".
+	 * Unix timestamp somewhere in the day (EventPrime keeps whatever time of day it was saved
+	 * at); the time "6:00 PM" or "18:00".
 	 */
 	public static function local_datetime( $date, $time ) {
 		$date = trim( (string) $date );
@@ -375,9 +376,8 @@ class LSET_Migrate {
 			return '';
 		}
 		if ( ctype_digit( $date ) ) {
-			// A timestamp of the day. EventPrime saves midnight local or midnight UTC; either way
-			// the local calendar day is the one at noon UTC of that stamp's UTC date, give or take.
-			$d = gmdate( 'Y-m-d', (int) $date + 12 * HOUR_IN_SECONDS );
+			// Any moment in the day: its date in the site's timezone.
+			$d = wp_date( 'Y-m-d', (int) $date );
 		} else {
 			$d = '';
 			foreach ( array( 'Y-m-d', 'd/m/Y', 'Y/m/d', 'd-m-Y', 'm/d/Y' ) as $f ) {
@@ -410,15 +410,35 @@ class LSET_Migrate {
 		return $d . ' ' . $t;
 	}
 
+	/**
+	 * An event's start or end as local "Y-m-d H:i:s". em_start_date_time / em_end_date_time hold
+	 * the exact moment and are used when set; otherwise the date and time fields. A disagreement
+	 * between the two is reported.
+	 */
+	private function event_moment( $p, $which ) {
+		$text  = self::local_datetime( get_post_meta( $p->ID, "em_{$which}_date", true ), get_post_meta( $p->ID, "em_{$which}_time", true ) );
+		$stamp = get_post_meta( $p->ID, "em_{$which}_date_time", true );
+		if ( ! is_numeric( $stamp ) || (int) $stamp <= 0 ) {
+			return $text;
+		}
+		$exact = wp_date( 'Y-m-d H:i:00', (int) $stamp );
+		if ( $text && $text !== $exact ) {
+			$this->warn( sprintf( 'Event %d "%s": %s date/time fields say %s but em_%s_date_time says %s. Using %s.', $p->ID, $p->post_title, $which, $text, $which, $exact, $exact ) );
+		}
+		return $exact;
+	}
+
 	private function events( $from ) {
 		global $wpdb;
 		$posts = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->posts} WHERE post_type = %s AND post_status NOT IN ('trash','auto-draft','inherit') ORDER BY ID", 'em_event' ) );
 		$this->log( count( $posts ) . ' EventPrime events found.' );
 		foreach ( $posts as $p ) {
 			$ep_id    = (int) $p->ID;
-			$start    = self::local_datetime( get_post_meta( $ep_id, 'em_start_date', true ), get_post_meta( $ep_id, 'em_start_time', true ) );
-			$end      = self::local_datetime( get_post_meta( $ep_id, 'em_end_date', true ), get_post_meta( $ep_id, 'em_end_time', true ) );
-			$all_day  = (bool) get_post_meta( $ep_id, 'em_all_day', true );
+			$start    = $this->event_moment( $p, 'start' );
+			$end      = $this->event_moment( $p, 'end' );
+			// EventPrime has no all-day switch here; "12:00 AM to 11:59 PM" on one day means all day.
+			$all_day  = (bool) get_post_meta( $ep_id, 'em_all_day', true )
+				|| ( $start && $end && substr( $start, 0, 10 ) === substr( $end, 0, 10 ) && '00:00' === substr( $start, 11, 5 ) && '23:59' === substr( $end, 11, 5 ) );
 			if ( '' === $start ) {
 				$this->warn( "Event $ep_id \"{$p->post_title}\": no start date. Skipped." );
 				$this->count( 'events', 'skipped' );
@@ -427,14 +447,6 @@ class LSET_Migrate {
 			if ( $from && substr( $start, 0, 10 ) < $from ) {
 				$this->count( 'events', 'before --from' );
 				continue;
-			}
-			// EventPrime's own UTC stamp is known to be an hour out in summer. Log any disagreement.
-			$stamp = get_post_meta( $ep_id, 'em_start_date_time', true );
-			if ( is_numeric( $stamp ) && (int) $stamp > 0 ) {
-				$ours = LSET_Time::ts( $start );
-				if ( abs( $ours - (int) $stamp ) >= MINUTE_IN_SECONDS ) {
-					$this->warn( sprintf( 'Event %d "%s": em_start_date/time says %s but em_start_date_time says %s (%+d min). Using the date/time text.', $ep_id, $p->post_title, $start, wp_date( 'Y-m-d H:i:s', (int) $stamp ), ( (int) $stamp - $ours ) / 60 ) );
-				}
 			}
 
 			$existing = get_posts(
@@ -486,9 +498,11 @@ class LSET_Migrate {
 
 			$venue_ids = array();
 			$terms     = $wpdb->get_col( $wpdb->prepare( "SELECT tt.term_id FROM {$wpdb->term_relationships} tr JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id WHERE tr.object_id = %d AND tt.taxonomy = 'em_venue'", $ep_id ) );
-			$meta_venue = get_post_meta( $ep_id, 'em_venue', true );
-			if ( is_numeric( $meta_venue ) ) {
-				$terms[] = (int) $meta_venue;
+			// em_venue may be one id or a list like [ "0", "82" ].
+			foreach ( (array) self::decode( get_post_meta( $ep_id, 'em_venue', true ) ) as $meta_venue ) {
+				if ( is_numeric( $meta_venue ) && (int) $meta_venue > 0 ) {
+					$terms[] = (int) $meta_venue;
+				}
 			}
 			foreach ( $terms as $tid ) {
 				if ( isset( $this->venues[ (int) $tid ] ) ) {
@@ -695,6 +709,38 @@ class LSET_Migrate {
 		$table = LSET_Install::table( 'bookings' );
 		$att   = LSET_Install::table( 'attendees' );
 
+		// Abandoned attempts: EventPrime sometimes left extra bookings (usually "pending") on the
+		// same Woo order as the real one. Those keep their own EventPrime status and no order line,
+		// so they don't count as sold and don't follow the order later.
+		$by_order = array();
+		foreach ( $ids as $bid ) {
+			$oid = (int) get_post_meta( $bid, 'wc_order_id', true );
+			if ( $oid ) {
+				$by_order[ $oid ][] = (int) $bid;
+			}
+		}
+		$extra = array();
+		foreach ( $by_order as $oid => $bids ) {
+			if ( count( $bids ) < 2 ) {
+				continue;
+			}
+			$real = array_values(
+				array_filter(
+					$bids,
+					function ( $b ) {
+						return 'completed' === self::ep_status( get_post_meta( $b, 'em_status', true ) );
+					}
+				)
+			);
+			$real = $real ? $real : array( max( $bids ) );
+			foreach ( array_diff( $bids, $real ) as $b ) {
+				$extra[ $b ] = true;
+			}
+			if ( array_diff( $bids, $real ) ) {
+				$this->warn( "Order #$oid has " . count( $bids ) . ' EventPrime bookings (' . implode( ', ', $bids ) . '); ' . implode( ', ', $real ) . ' taken as the real one, the rest keep their EventPrime status.' );
+			}
+		}
+
 		foreach ( $ids as $bid ) {
 			$bid      = (int) $bid;
 			$ep_event = (int) get_post_meta( $bid, 'em_event', true );
@@ -711,18 +757,29 @@ class LSET_Migrate {
 
 			$order_id = (int) get_post_meta( $bid, 'wc_order_id', true );
 			$order    = $order_id ? wc_get_order( $order_id ) : null;
-			$status   = $order ? $order->get_status() : self::ep_status( get_post_meta( $bid, 'em_status', true ) );
+			$is_extra = isset( $extra[ $bid ] );
+			$status   = $order && ! $is_extra ? $order->get_status() : self::ep_status( get_post_meta( $bid, 'em_status', true ) );
+			if ( $is_extra ) {
+				$this->count( 'bookings', 'extra on an order (kept as ' . $status . ')' );
+			}
 			if ( $order_id && ! $order ) {
 				$this->warn( "Booking $bid: Woo order #$order_id not found; status taken from EventPrime." );
 			}
 			if ( ! $order_id ) {
 				$this->warn( "Booking $bid has no Woo order (" . get_post_meta( $bid, 'em_payment_method', true ) . '); kept as a migrated booking with no order link.' );
 			}
-			$item_id = 0;
-			if ( $order ) {
-				foreach ( $order->get_items() as $iid => $item ) {
-					$item_id = (int) $iid; // EventPrime used one hidden product per order; take its line.
-					break;
+			// EventPrime made one order line per ticket type, each with ep_tickets_data.tkt_id.
+			$lines = array();
+			if ( $order && ! $is_extra ) {
+				$items = $order->get_items();
+				foreach ( $items as $iid => $item ) {
+					$data = self::decode( $item->get_meta( 'ep_tickets_data', true ) );
+					if ( is_array( $data ) && isset( $data['tkt_id'] ) ) {
+						$lines[ (int) $data['tkt_id'] ] = (int) $iid;
+					}
+				}
+				if ( ! $lines && 1 === count( $items ) ) {
+					$lines['*'] = (int) key( $items );
 				}
 			}
 			$tickets = isset( $info['tickets'] ) && is_array( $info['tickets'] ) ? $info['tickets'] : array();
@@ -745,6 +802,10 @@ class LSET_Migrate {
 					continue;
 				}
 				$ticket_id = $this->tickets[ $ep_tid ];
+				$item_id   = isset( $lines[ $ep_tid ] ) ? $lines[ $ep_tid ] : ( isset( $lines['*'] ) ? $lines['*'] : 0 );
+				if ( $order && ! $is_extra && ! $item_id ) {
+					$this->warn( "Booking $bid: no line on order #$order_id for ticket $ep_tid; it won't follow later changes to the order." );
+				}
 				$qty       = isset( $t['qty'] ) ? (int) $t['qty'] : 0;
 				$price     = isset( $t['price'] ) ? (float) $t['price'] : 0;
 				$subtotal  = isset( $t['subtotal'] ) ? (float) $t['subtotal'] : $price * $qty;
@@ -754,7 +815,7 @@ class LSET_Migrate {
 					'order_id'       => $order_id,
 					'order_item_id'  => $item_id,
 					'qty'            => $qty,
-					'refunded_qty'   => 'refunded' === $status ? $qty : 0,
+					'refunded_qty'   => 'refunded' === $status ? $qty : ( $order && $item_id ? min( $qty, absint( $order->get_qty_refunded_for_item( $item_id ) ) ) : 0 ),
 					'unit_price'     => round( $price, 2 ),
 					'line_total'     => round( $subtotal, 2 ),
 					'status'         => $status,
