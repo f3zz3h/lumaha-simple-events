@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       Lumaha Simple Event Tickets
- * Plugin URI:        https://github.com/f3zz3h/lumaha-simple-event-tickets
+ * Plugin URI:        https://github.com/f3zz3h/lumaha-simple-events
  * Description:       School events with tickets sold through the normal WooCommerce checkout. Attendee details per ticket, capacity with short holds, and an attendee list, CSV and printable register for the night.
  * Version:           0.1.0
  * Author:            Lumaha
@@ -11,7 +11,7 @@
  * Requires PHP:      7.4
  * Requires Plugins:  woocommerce
  * Text Domain:       lumaha-simple-event-tickets
- * Update URI:        https://github.com/f3zz3h/lumaha-simple-event-tickets
+ * Update URI:        https://github.com/f3zz3h/lumaha-simple-events
  *
  * How it fits together:
  * - Events are a post type (lset_event), venues a taxonomy (lset_venue).

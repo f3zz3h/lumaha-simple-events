@@ -146,3 +146,9 @@ GitHub Actions runs them on every pull request (PHP 8.3 + latest WooCommerce, PH
 Bump the version in the plugin header, `LSET_VERSION` and `Lumaha_Simple_Event_Tickets::VERSION`,
 then push a tag like `v0.2.0`. The Release workflow builds the zip and publishes it; sites see the update
 in Dashboard → Updates.
+
+## Licence
+
+GPL-2.0-or-later, the same as WordPress: see [LICENSE](LICENSE). The QR code maker in
+`includes/class-lset-qr.php` follows Project Nayuki's QR Code generator (MIT); its notice is kept at the
+top of that file.

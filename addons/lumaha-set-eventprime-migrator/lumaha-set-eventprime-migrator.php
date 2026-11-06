@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       Lumaha Simple Event Tickets: EventPrime Migrator
- * Plugin URI:        https://github.com/f3zz3h/lumaha-simple-event-tickets
+ * Plugin URI:        https://github.com/f3zz3h/lumaha-simple-events
  * Description:       One-off tool. Adds the WP-CLI command <code>wp lset migrate-eventprime</code>, which copies EventPrime events, tickets and bookings into Lumaha Simple Event Tickets. Deactivate and delete it once the move is done.
  * Version:           0.1.0
  * Author:            Lumaha
