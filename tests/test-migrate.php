@@ -246,10 +246,10 @@ class LSET_Test_Migrate extends LSET_Test_Case {
 		$tickets = array_column( LSET_Store::tickets( $ids[0] ), null, 'name' );
 		$this->assertSame( 3.5, (float) $tickets['Child']['price'] );
 		$this->assertSame( 40, $tickets['Child']['capacity'] );
+		// EventPrime's per-ticket windows become one for the event: Adult is on sale now, so the event is.
 		$this->assertSame( 'days', $tickets['Child']['sale_start_mode'] );
-		$this->assertSame( 14, $tickets['Child']['sale_start_days'] );
+		$this->assertSame( '', $e['sale_mode'] );
 		$this->assertNull( $tickets['Adult']['capacity'] );
-		$this->assertSame( 4, $tickets['Adult']['max_qty'] );
 		$this->assertSame( $groups[0]['id'], $tickets['Adult']['group_id'] );
 
 		$rows = $this->bookings();

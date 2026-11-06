@@ -27,7 +27,7 @@ define( 'LSET_VERSION', '0.1.0' );
 define( 'LSET_PLUGIN_FILE', __FILE__ );
 define( 'LSET_DIR', __DIR__ . '/' );
 define( 'LSET_URL', plugin_dir_url( __FILE__ ) );
-define( 'LSET_DB_VERSION', 1 );
+define( 'LSET_DB_VERSION', 2 );
 define( 'LSET_CPT', 'lset_event' );
 define( 'LSET_VENUE', 'lset_venue' );
 define( 'LSET_CAP_ATTENDEES', 'lset_view_attendees' );
@@ -62,7 +62,6 @@ final class Lumaha_Simple_Event_Tickets {
 		$defaults = array(
 			'hold_minutes'     => 15,
 			'auto_complete'    => 1,
-			'default_max'      => 20,
 			'event_slug'       => 'events',
 			'delete_on_remove' => 0,
 		);

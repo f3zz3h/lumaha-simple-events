@@ -199,17 +199,6 @@ class LSET_Cart {
 		$att_in   = isset( $in['att'] ) ? (array) $in['att'] : array();
 		$book_in  = isset( $in['book'] ) ? (array) $in['book'] : array();
 
-		// How many of each ticket are already in the basket (for the per-order max).
-		$in_cart = array();
-		if ( WC()->cart ) {
-			foreach ( WC()->cart->get_cart() as $item ) {
-				if ( ! empty( $item['lset'] ) ) {
-					$tid             = (int) $item['lset']['ticket_id'];
-					$in_cart[ $tid ] = ( isset( $in_cart[ $tid ] ) ? $in_cart[ $tid ] : 0 ) + (int) $item['quantity'];
-				}
-			}
-		}
-
 		$labels = array();
 		foreach ( array_merge( $a_fields, $b_fields ) as $f ) {
 			$labels[ $f['id'] ] = $f['label'];
@@ -245,18 +234,6 @@ class LSET_Cart {
 			if ( '' !== $state ) {
 				/* translators: %s: ticket name */
 				$errors->add( 'lset_ended', sprintf( __( 'Sales of "%s" have ended.', 'lumaha-simple-event-tickets' ), $t['name'] ) );
-				continue;
-			}
-			$have = isset( $in_cart[ $tid ] ) ? $in_cart[ $tid ] : 0;
-			$max  = LSET_Store::max_per_order( $t );
-			if ( $qty + $have > $max ) {
-				/* translators: 1: number, 2: ticket name */
-				$errors->add( 'lset_max', sprintf( __( 'You can book up to %1$d "%2$s" tickets per order (including any already in your basket).', 'lumaha-simple-event-tickets' ), $max, $t['name'] ) );
-				continue;
-			}
-			if ( $t['min_qty'] > 0 && $qty + $have < $t['min_qty'] ) {
-				/* translators: 1: number, 2: ticket name */
-				$errors->add( 'lset_min', sprintf( __( 'Please book at least %1$d "%2$s" tickets.', 'lumaha-simple-event-tickets' ), $t['min_qty'], $t['name'] ) );
 				continue;
 			}
 			$people = array();
@@ -479,7 +456,6 @@ class LSET_Cart {
 			return;
 		}
 		$by_event = array();
-		$per_tid  = array();
 		foreach ( WC()->cart->get_cart() as $item ) {
 			if ( empty( $item['lset'] ) ) {
 				continue;
@@ -501,12 +477,6 @@ class LSET_Cart {
 			if ( count( (array) $l['attendees'] ) !== $qty ) {
 				/* translators: %s: ticket name */
 				wc_add_notice( sprintf( __( 'The attendee details for "%s" don\'t match the quantity. Please remove it and book again.', 'lumaha-simple-event-tickets' ), $t['name'] ), 'error' );
-				continue;
-			}
-			$per_tid[ $t['id'] ] = ( isset( $per_tid[ $t['id'] ] ) ? $per_tid[ $t['id'] ] : 0 ) + $qty;
-			if ( $per_tid[ $t['id'] ] > LSET_Store::max_per_order( $t ) ) {
-				/* translators: 1: number, 2: ticket name */
-				wc_add_notice( sprintf( __( 'You can book up to %1$d "%2$s" tickets per order.', 'lumaha-simple-event-tickets' ), LSET_Store::max_per_order( $t ), $t['name'] ), 'error' );
 				continue;
 			}
 			$by_event[ $e['id'] ][ $l['uid'] ] = array( $t['id'], $qty );

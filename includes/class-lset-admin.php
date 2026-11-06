@@ -21,6 +21,7 @@ class LSET_Admin {
 		add_action( 'admin_post_lset_delete_field', array( __CLASS__, 'handle_delete_field' ) );
 		add_action( 'admin_post_lset_duplicate', array( __CLASS__, 'handle_duplicate' ) );
 		add_action( 'admin_post_lset_save_settings', array( __CLASS__, 'handle_save_settings' ) );
+		add_action( 'admin_post_lset_create_page', array( __CLASS__, 'handle_create_page' ) );
 		add_filter( 'post_row_actions', array( __CLASS__, 'row_actions' ), 10, 2 );
 		add_filter( 'manage_' . LSET_CPT . '_posts_columns', array( __CLASS__, 'columns' ) );
 		add_action( 'manage_' . LSET_CPT . '_posts_custom_column', array( __CLASS__, 'column' ), 10, 2 );
@@ -55,6 +56,15 @@ class LSET_Admin {
 	}
 
 	public static function notices() {
+		$screen = get_current_screen();
+		if ( $screen && 'edit-' . LSET_CPT === $screen->id && ! self::listing_page( 'upcoming' ) && current_user_can( 'manage_woocommerce' ) ) {
+			printf(
+				'<div class="notice notice-info"><p>%s <a href="%s">%s</a></p></div>',
+				esc_html__( 'Events aren\'t listed on your site yet.', 'lumaha-simple-event-tickets' ),
+				esc_url( admin_url( 'edit.php?post_type=' . LSET_CPT . '&page=lset-settings#lset-pages' ) ),
+				esc_html__( 'Set up the Events and Past events pages', 'lumaha-simple-event-tickets' )
+			);
+		}
 		if ( empty( $_GET['lset_msg'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- message display only.
 			return;
 		}
@@ -62,6 +72,7 @@ class LSET_Admin {
 			'field_saved'    => __( 'Field saved.', 'lumaha-simple-event-tickets' ),
 			'field_deleted'  => __( 'Field deleted.', 'lumaha-simple-event-tickets' ),
 			'settings_saved' => __( 'Settings saved.', 'lumaha-simple-event-tickets' ),
+			'page_created'   => __( 'Page created and published. Add it to your menu under Appearance → Menus (or in Elementor) so people can find it.', 'lumaha-simple-event-tickets' ),
 			'duplicated'     => __( 'Event copied as a draft. Check the dates and tickets, then publish it.', 'lumaha-simple-event-tickets' ),
 		);
 		$key = sanitize_key( wp_unslash( $_GET['lset_msg'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -128,6 +139,21 @@ class LSET_Admin {
 			<label><input type="checkbox" name="lset[bookings]" value="1" <?php checked( $is_new || $e['bookings'] ); ?>> <strong><?php esc_html_e( 'Take bookings for this event', 'lumaha-simple-event-tickets' ); ?></strong></label><br>
 			<span class="description"><?php esc_html_e( 'Untick for information-only events (fairs, AGM).', 'lumaha-simple-event-tickets' ); ?></span>
 		</p>
+		<div class="lset-sale" data-mode="<?php echo esc_attr( $e['sale_mode'] ); ?>">
+			<label for="lset_sale_mode"><strong><?php esc_html_e( 'Tickets on sale', 'lumaha-simple-event-tickets' ); ?></strong></label><br>
+			<select id="lset_sale_mode" name="lset[sale_mode]" class="lset-sale-mode">
+				<option value="" <?php selected( $e['sale_mode'], '' ); ?>><?php esc_html_e( 'Now', 'lumaha-simple-event-tickets' ); ?></option>
+				<option value="date" <?php selected( $e['sale_mode'], 'date' ); ?>><?php esc_html_e( 'From a date', 'lumaha-simple-event-tickets' ); ?></option>
+				<option value="days" <?php selected( $e['sale_mode'], 'days' ); ?>><?php esc_html_e( 'A number of days before the event', 'lumaha-simple-event-tickets' ); ?></option>
+			</select>
+			<span class="lset-sale-date"><input type="datetime-local" name="lset[sale_start]" aria-label="<?php esc_attr_e( 'On sale from', 'lumaha-simple-event-tickets' ); ?>" value="<?php echo esc_attr( $e['sale_start'] ? substr( str_replace( ' ', 'T', $e['sale_start'] ), 0, 16 ) : '' ); ?>"></span>
+			<span class="lset-sale-days"><input type="number" min="0" step="1" class="lset-w-tiny" name="lset[sale_days]" aria-label="<?php esc_attr_e( 'Days before the event', 'lumaha-simple-event-tickets' ); ?>" value="<?php echo esc_attr( null === $e['sale_days'] ? '' : $e['sale_days'] ); ?>"> <?php esc_html_e( 'days before (from midnight)', 'lumaha-simple-event-tickets' ); ?></span>
+			<p>
+				<label for="lset_sale_end"><?php esc_html_e( 'Sales close', 'lumaha-simple-event-tickets' ); ?></label><br>
+				<input type="datetime-local" id="lset_sale_end" name="lset[sale_end]" value="<?php echo esc_attr( $e['sale_end'] ? substr( str_replace( ' ', 'T', $e['sale_end'] ), 0, 16 ) : '' ); ?>">
+				<span class="description"><?php esc_html_e( 'Leave blank to close when the event starts. Applies to every ticket.', 'lumaha-simple-event-tickets' ); ?></span>
+			</p>
+		</div>
 		<p>
 			<label for="lset_closed_msg"><?php esc_html_e( 'Message when bookings are closed or sold out (optional)', 'lumaha-simple-event-tickets' ); ?></label><br>
 			<input type="text" class="widefat" id="lset_closed_msg" name="lset[closed_msg]" value="<?php echo esc_attr( $e['closed_msg'] ); ?>" placeholder="<?php esc_attr_e( 'e.g. Just turn up on the day, no tickets needed.', 'lumaha-simple-event-tickets' ); ?>">
@@ -141,7 +167,7 @@ class LSET_Admin {
 		$groups  = LSET_Store::groups( $post->ID );
 		$sold    = $post->ID ? LSET_Capacity::taken( $post->ID ) : array();
 		?>
-		<p class="description"><?php esc_html_e( 'Leave capacity blank for no limit. Price 0 means free (it still goes through the checkout as a £0 order). Drag the ⇅ handle to reorder.', 'lumaha-simple-event-tickets' ); ?></p>
+		<p class="description"><?php esc_html_e( 'Leave capacity blank for no limit. The box under it is optional: e.g. 5 shows buyers "Only 5 left" once 5 or fewer remain. Price 0 means free (it still goes through the checkout as a £0 order). When tickets go on sale is set once, in Event details above. Drag the ⇅ handle to reorder.', 'lumaha-simple-event-tickets' ); ?></p>
 		<table class="widefat lset-tickets">
 			<thead>
 				<tr>
@@ -150,8 +176,6 @@ class LSET_Admin {
 					<th><?php esc_html_e( 'Price', 'lumaha-simple-event-tickets' ); ?></th>
 					<th><?php esc_html_e( 'Capacity', 'lumaha-simple-event-tickets' ); ?></th>
 					<th><?php esc_html_e( 'Group', 'lumaha-simple-event-tickets' ); ?></th>
-					<th><?php esc_html_e( 'On sale', 'lumaha-simple-event-tickets' ); ?></th>
-					<th><?php esc_html_e( 'Per order', 'lumaha-simple-event-tickets' ); ?></th>
 					<th><?php esc_html_e( 'Taken', 'lumaha-simple-event-tickets' ); ?></th>
 					<th></th>
 				</tr>
@@ -204,12 +228,6 @@ class LSET_Admin {
 			'price'           => '',
 			'capacity'        => null,
 			'group_id'        => 0,
-			'sale_start_mode' => '',
-			'sale_start'      => '',
-			'sale_start_days' => null,
-			'sale_end'        => '',
-			'min_qty'         => 0,
-			'max_qty'         => 0,
 			'hidden'          => false,
 			'show_left_below' => null,
 		);
@@ -231,23 +249,9 @@ class LSET_Admin {
 			<td><input type="number" min="0" step="0.01" class="lset-w-num" name="<?php echo esc_attr( $name ); ?>[price]" value="<?php echo esc_attr( '' === $t['price'] ? '' : wc_format_decimal( $t['price'], 2 ) ); ?>" placeholder="0.00"></td>
 			<td>
 				<input type="number" min="0" step="1" class="lset-w-num" name="<?php echo esc_attr( $name ); ?>[capacity]" value="<?php echo esc_attr( $fmt( $t['capacity'] ) ); ?>" placeholder="<?php esc_attr_e( 'no limit', 'lumaha-simple-event-tickets' ); ?>">
-				<label class="lset-small"><?php esc_html_e( 'Show "x left" below', 'lumaha-simple-event-tickets' ); ?> <input type="number" min="0" step="1" class="lset-w-tiny" name="<?php echo esc_attr( $name ); ?>[show_left_below]" value="<?php echo esc_attr( $fmt( $t['show_left_below'] ) ); ?>"></label>
+				<label class="lset-small lset-left-at" title="<?php esc_attr_e( 'Optional. Once this many or fewer are left, buyers see "Only 3 left" next to the ticket. Leave blank to never show it.', 'lumaha-simple-event-tickets' ); ?>"><?php esc_html_e( 'Say "only N left" at', 'lumaha-simple-event-tickets' ); ?> <input type="number" min="0" step="1" class="lset-w-tiny" name="<?php echo esc_attr( $name ); ?>[show_left_below]" value="<?php echo esc_attr( $fmt( $t['show_left_below'] ) ); ?>" placeholder="<?php esc_attr_e( 'off', 'lumaha-simple-event-tickets' ); ?>"></label>
 			</td>
 			<td><input type="text" list="lset-group-names" class="lset-w-group" name="<?php echo esc_attr( $name ); ?>[group]" value="<?php echo esc_attr( $group ); ?>"></td>
-			<td class="lset-sale">
-				<select name="<?php echo esc_attr( $name ); ?>[sale_start_mode]" class="lset-sale-mode">
-					<option value="" <?php selected( $t['sale_start_mode'], '' ); ?>><?php esc_html_e( 'Now', 'lumaha-simple-event-tickets' ); ?></option>
-					<option value="date" <?php selected( $t['sale_start_mode'], 'date' ); ?>><?php esc_html_e( 'From a date', 'lumaha-simple-event-tickets' ); ?></option>
-					<option value="days" <?php selected( $t['sale_start_mode'], 'days' ); ?>><?php esc_html_e( 'Days before event', 'lumaha-simple-event-tickets' ); ?></option>
-				</select>
-				<span class="lset-sale-date"><input type="datetime-local" name="<?php echo esc_attr( $name ); ?>[sale_start]" value="<?php echo esc_attr( $t['sale_start'] ? substr( str_replace( ' ', 'T', $t['sale_start'] ), 0, 16 ) : '' ); ?>"></span>
-				<span class="lset-sale-days"><input type="number" min="0" step="1" class="lset-w-tiny" name="<?php echo esc_attr( $name ); ?>[sale_start_days]" value="<?php echo esc_attr( $fmt( $t['sale_start_days'] ) ); ?>"> <?php esc_html_e( 'days', 'lumaha-simple-event-tickets' ); ?></span>
-				<label class="lset-small"><?php esc_html_e( 'Until (blank = event start)', 'lumaha-simple-event-tickets' ); ?><br><input type="datetime-local" name="<?php echo esc_attr( $name ); ?>[sale_end]" value="<?php echo esc_attr( $t['sale_end'] ? substr( str_replace( ' ', 'T', $t['sale_end'] ), 0, 16 ) : '' ); ?>"></label>
-			</td>
-			<td>
-				<label class="lset-small"><?php esc_html_e( 'Min', 'lumaha-simple-event-tickets' ); ?> <input type="number" min="0" step="1" class="lset-w-tiny" name="<?php echo esc_attr( $name ); ?>[min_qty]" value="<?php echo esc_attr( $t['min_qty'] ? $t['min_qty'] : '' ); ?>"></label>
-				<label class="lset-small"><?php esc_html_e( 'Max', 'lumaha-simple-event-tickets' ); ?> <input type="number" min="0" step="1" class="lset-w-tiny" name="<?php echo esc_attr( $name ); ?>[max_qty]" value="<?php echo esc_attr( $t['max_qty'] ? $t['max_qty'] : '' ); ?>" placeholder="<?php echo (int) Lumaha_Simple_Event_Tickets::setting( 'default_max' ); ?>"></label>
-			</td>
 			<td><?php echo (int) $sold; ?></td>
 			<td><button type="button" class="button-link lset-remove" aria-label="<?php esc_attr_e( 'Remove ticket', 'lumaha-simple-event-tickets' ); ?>">✕</button></td>
 		</tr>
@@ -321,6 +325,13 @@ class LSET_Admin {
 		LSET_Store::save_dates( $post_id, $start, $end, ! empty( $in['all_day'] ) );
 
 		update_post_meta( $post_id, '_lset_bookings', empty( $in['bookings'] ) ? 0 : 1 );
+		LSET_Store::save_sale_window(
+			$post_id,
+			isset( $in['sale_mode'] ) ? sanitize_key( $in['sale_mode'] ) : '',
+			isset( $in['sale_start'] ) ? self::datetime_local( $in['sale_start'] ) : '',
+			isset( $in['sale_days'] ) ? sanitize_text_field( $in['sale_days'] ) : '',
+			isset( $in['sale_end'] ) ? self::datetime_local( $in['sale_end'] ) : ''
+		);
 		update_post_meta( $post_id, '_lset_closed_msg', isset( $in['closed_msg'] ) ? sanitize_text_field( $in['closed_msg'] ) : '' );
 		$names = isset( $in['name_fields'] ) ? sanitize_key( $in['name_fields'] ) : 'required';
 		update_post_meta( $post_id, '_lset_name_fields', in_array( $names, array( 'required', 'optional', 'off' ), true ) ? $names : 'required' );
@@ -409,7 +420,7 @@ class LSET_Admin {
 				$gid                = $group_by_name[ $k ];
 				$used_group[ $gid ] = true;
 			}
-			$mode = isset( $t['sale_start_mode'] ) ? sanitize_key( $t['sale_start_mode'] ) : '';
+			$current = $id ? $existing[ $id ] : array();
 			LSET_Store::save_ticket(
 				array(
 					'id'              => $id,
@@ -419,12 +430,7 @@ class LSET_Admin {
 					'description'     => isset( $t['description'] ) ? $t['description'] : '',
 					'price'           => isset( $t['price'] ) ? wc_format_decimal( $t['price'] ) : 0,
 					'capacity'        => isset( $t['capacity'] ) ? $t['capacity'] : '',
-					'sale_start_mode' => $mode,
-					'sale_start'      => isset( $t['sale_start'] ) ? self::datetime_local( $t['sale_start'] ) : '',
-					'sale_start_days' => isset( $t['sale_start_days'] ) ? $t['sale_start_days'] : '',
-					'sale_end'        => isset( $t['sale_end'] ) ? self::datetime_local( $t['sale_end'] ) : '',
-					'min_qty'         => isset( $t['min_qty'] ) ? $t['min_qty'] : 0,
-					'max_qty'         => isset( $t['max_qty'] ) ? $t['max_qty'] : 0,
+					'ep_id'           => isset( $current['ep_id'] ) ? $current['ep_id'] : null,
 					'sort_order'      => $order++,
 					'hidden'          => ! empty( $t['hidden'] ),
 					'show_left_below' => isset( $t['show_left_below'] ) ? $t['show_left_below'] : '',
@@ -708,14 +714,107 @@ class LSET_Admin {
 				<table class="form-table">
 					<tr><th><label for="lset_hold"><?php esc_html_e( 'Hold tickets in a basket for', 'lumaha-simple-event-tickets' ); ?></label></th><td><input type="number" min="1" max="120" id="lset_hold" name="hold_minutes" class="small-text" value="<?php echo (int) $s['hold_minutes']; ?>"> <?php esc_html_e( 'minutes', 'lumaha-simple-event-tickets' ); ?></td></tr>
 					<tr><th><?php esc_html_e( 'Complete ticket orders', 'lumaha-simple-event-tickets' ); ?></th><td><label><input type="checkbox" name="auto_complete" value="1" <?php checked( $s['auto_complete'] ); ?>> <?php esc_html_e( 'Mark paid (and free) orders that only hold event tickets as Completed straight away', 'lumaha-simple-event-tickets' ); ?></label></td></tr>
-					<tr><th><label for="lset_max"><?php esc_html_e( 'Default most per order', 'lumaha-simple-event-tickets' ); ?></label></th><td><input type="number" min="1" id="lset_max" name="default_max" class="small-text" value="<?php echo (int) $s['default_max']; ?>"> <span class="description"><?php esc_html_e( 'Used when a ticket has no "Max" of its own.', 'lumaha-simple-event-tickets' ); ?></span></td></tr>
 					<tr><th><label for="lset_slug"><?php esc_html_e( 'Event address', 'lumaha-simple-event-tickets' ); ?></label></th><td><code><?php echo esc_html( home_url( '/' ) ); ?></code><input type="text" id="lset_slug" name="event_slug" class="regular-text" value="<?php echo esc_attr( $s['event_slug'] ); ?>"><code>/&lt;event-name&gt;/</code></td></tr>
 					<tr><th><?php esc_html_e( 'When the plugin is deleted', 'lumaha-simple-event-tickets' ); ?></th><td><label><input type="checkbox" name="delete_on_remove" value="1" <?php checked( $s['delete_on_remove'] ); ?>> <?php esc_html_e( 'Delete all events, tickets, bookings and attendee details. Orders are never touched.', 'lumaha-simple-event-tickets' ); ?></label></td></tr>
 				</table>
 				<?php submit_button(); ?>
 			</form>
+
+			<h2 id="lset-pages"><?php esc_html_e( 'Event pages', 'lumaha-simple-event-tickets' ); ?></h2>
+			<p><?php esc_html_e( 'Lists of events for your site. Create a page here, or put the shortcode on any page (an Elementor Shortcode widget works too).', 'lumaha-simple-event-tickets' ); ?></p>
+			<table class="widefat striped lset-pages">
+				<thead><tr><th><?php esc_html_e( 'List', 'lumaha-simple-event-tickets' ); ?></th><th><?php esc_html_e( 'Shortcode', 'lumaha-simple-event-tickets' ); ?></th><th><?php esc_html_e( 'Page', 'lumaha-simple-event-tickets' ); ?></th></tr></thead>
+				<tbody>
+				<?php foreach ( self::listing_pages() as $key => $def ) : ?>
+					<?php $page = self::listing_page( $key ); ?>
+					<tr>
+						<td><?php echo esc_html( $def['label'] ); ?></td>
+						<td><code><?php echo esc_html( $def['shortcode'] ); ?></code></td>
+						<td>
+							<?php if ( $page ) : ?>
+								<a href="<?php echo esc_url( get_permalink( $page ) ); ?>"><?php echo esc_html( get_the_title( $page ) ); ?></a>
+								(<a href="<?php echo esc_url( get_edit_post_link( $page ) ); ?>"><?php esc_html_e( 'edit', 'lumaha-simple-event-tickets' ); ?></a>)
+							<?php else : ?>
+								<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+									<input type="hidden" name="action" value="lset_create_page">
+									<input type="hidden" name="list" value="<?php echo esc_attr( $key ); ?>">
+									<?php wp_nonce_field( 'lset_create_page' ); ?>
+									<?php /* translators: %s: page title */ submit_button( sprintf( __( 'Create "%s" page', 'lumaha-simple-event-tickets' ), $def['title'] ), 'secondary small', 'submit', false ); ?>
+								</form>
+							<?php endif; ?>
+						</td>
+					</tr>
+				<?php endforeach; ?>
+				</tbody>
+			</table>
+			<p class="description"><?php esc_html_e( 'Options: limit="6" shows only the next 6; order="desc" shows newest first. Past events are listed newest first already.', 'lumaha-simple-event-tickets' ); ?></p>
 		</div>
 		<?php
+	}
+
+	/** The two listing pages this screen can make. */
+	private static function listing_pages() {
+		return array(
+			'upcoming' => array(
+				'label'     => __( 'Upcoming events', 'lumaha-simple-event-tickets' ),
+				'title'     => __( 'Events', 'lumaha-simple-event-tickets' ),
+				'shortcode' => '[lset_events]',
+			),
+			'past'     => array(
+				'label'     => __( 'Past events', 'lumaha-simple-event-tickets' ),
+				'title'     => __( 'Past events', 'lumaha-simple-event-tickets' ),
+				'shortcode' => '[lset_events past="1"]',
+			),
+		);
+	}
+
+	/** The published page showing a list: the one we made, else any page using its shortcode. Returns its id or 0. */
+	public static function listing_page( $key ) {
+		$id = (int) get_option( 'lset_page_' . $key );
+		if ( $id && 'publish' === get_post_status( $id ) ) {
+			return $id;
+		}
+		global $wpdb;
+		$pages = $wpdb->get_results( $wpdb->prepare( "SELECT ID, post_content FROM {$wpdb->posts} WHERE post_type = 'page' AND post_status = 'publish' AND post_content LIKE %s ORDER BY ID", '%[lset_events%' ) );
+		foreach ( $pages as $p ) {
+			if ( preg_match_all( '/\[lset_events([^\]]*)\]/', $p->post_content, $m ) ) {
+				foreach ( $m[1] as $attrs ) {
+					$is_past = (bool) preg_match( '/(past|show_past)\s*=\s*["\']?1/', $attrs );
+					if ( ( 'past' === $key ) === $is_past ) {
+						return (int) $p->ID;
+					}
+				}
+			}
+		}
+		return 0;
+	}
+
+	public static function handle_create_page() {
+		check_admin_referer( 'lset_create_page' );
+		if ( ! current_user_can( 'manage_woocommerce' ) || ! current_user_can( 'publish_pages' ) ) {
+			wp_die( esc_html__( 'Sorry, you are not allowed to do that.', 'lumaha-simple-event-tickets' ) );
+		}
+		$key   = isset( $_POST['list'] ) ? sanitize_key( wp_unslash( $_POST['list'] ) ) : '';
+		$pages = self::listing_pages();
+		if ( ! isset( $pages[ $key ] ) ) {
+			wp_die( esc_html__( 'Unknown list.', 'lumaha-simple-event-tickets' ) );
+		}
+		$id = self::listing_page( $key );
+		if ( ! $id ) {
+			$id = wp_insert_post(
+				array(
+					'post_type'    => 'page',
+					'post_status'  => 'publish',
+					'post_title'   => $pages[ $key ]['title'],
+					'post_content' => '<!-- wp:shortcode -->' . $pages[ $key ]['shortcode'] . '<!-- /wp:shortcode -->',
+				)
+			);
+		}
+		if ( $id && ! is_wp_error( $id ) ) {
+			update_option( 'lset_page_' . $key, (int) $id );
+		}
+		wp_safe_redirect( admin_url( 'edit.php?post_type=' . LSET_CPT . '&page=lset-settings&lset_msg=page_created#lset-pages' ) );
+		exit;
 	}
 
 	public static function handle_save_settings() {
@@ -728,7 +827,6 @@ class LSET_Admin {
 		$new  = array(
 			'hold_minutes'     => isset( $_POST['hold_minutes'] ) ? min( 120, max( 1, (int) $_POST['hold_minutes'] ) ) : 15,
 			'auto_complete'    => empty( $_POST['auto_complete'] ) ? 0 : 1,
-			'default_max'      => isset( $_POST['default_max'] ) ? max( 1, (int) $_POST['default_max'] ) : 20,
 			'event_slug'       => $slug ? $slug : 'events',
 			'delete_on_remove' => empty( $_POST['delete_on_remove'] ) ? 0 : 1,
 		);

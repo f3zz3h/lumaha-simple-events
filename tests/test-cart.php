@@ -68,19 +68,17 @@ class LSET_Test_Cart extends LSET_Test_Case {
 		$this->assertStringContainsString( 'Phone', $msgs );
 	}
 
-	public function test_max_per_order_counts_basket() {
+	public function test_no_per_order_limit_below_capacity() {
 		$e = $this->event( '2030-07-03 12:00:00', '2030-07-03 15:00:00', array( '_lset_name_fields' => 'off' ) );
-		$t = $this->ticket( $e, array( 'max_qty' => 2 ) );
-		$in = array( 'qty' => array( $t => 2 ) );
-		$this->assertIsArray( LSET_Cart::add( $e, $in ) );
-		$err = LSET_Cart::add( $e, array( 'qty' => array( $t => 1 ) ) );
-		$this->assertWPError( $err );
-		$this->assertSame( 'lset_max', $err->get_error_code() );
+		$t = $this->ticket( $e, array( 'capacity' => 100 ) );
+		$this->assertIsArray( LSET_Cart::add( $e, array( 'qty' => array( $t => 30 ) ) ) );
+		$this->assertIsArray( LSET_Cart::add( $e, array( 'qty' => array( $t => 25 ) ) ) ); // 55 in the basket is fine.
 	}
 
 	public function test_not_on_sale_yet_and_closed() {
 		$e = $this->event( '2030-07-03 12:00:00', '2030-07-03 15:00:00', array( '_lset_name_fields' => 'off' ) );
-		$t = $this->ticket( $e, array( 'sale_start_mode' => 'date', 'sale_start' => '2030-06-01 09:00:00' ) );
+		LSET_Store::save_sale_window( $e, 'date', '2030-06-01 09:00:00', null, '' );
+		$t = $this->ticket( $e );
 		$this->assertSame( 'lset_not_yet', LSET_Cart::validate( $e, array( 'qty' => array( $t => 1 ) ) )->get_error_code() );
 
 		update_post_meta( $e, '_lset_bookings', 0 );

@@ -10,10 +10,12 @@ WordPress and WooCommerce, no build step, no licence server.
 ## What it does
 
 - **Events** (Events → Add event): title, description, image, start and end, venue, bookings on/off,
+  when tickets go on sale (now, a date, or N days before) and when sales close (default: event start),
   and a message for when bookings are closed. Times are saved exactly as typed, in the site timezone.
-- **Tickets** per event: price (0 = free), capacity, sale start (a date, or N days before), sale end
-  (default: event start), min and max per order, hidden, "x left" when low, and optional **groups** that
-  share a capacity (e.g. "Volunteering" capped at 40 across all volunteer slots).
+- **Tickets** per event: price (0 = free), capacity, hidden, an optional "only N left" note when low, and
+  optional **groups** that share a capacity (e.g. "Volunteering" capped at 40 across all volunteer slots).
+  There's no per-order limit; the quantity list goes up to 50 or what's left.
+- **Event lists**: Events → Settings → *Event pages* makes an "Events" and a "Past events" page in one click.
 - **Checkout fields** (Events → Checkout fields): a reusable list (text, number, long text, drop-down,
   tick box). Each event picks which to ask **for each ticket** (child's class, dietary needs) or **once per
   booking** (contact phone), and which are required.
@@ -34,7 +36,8 @@ WordPress and WooCommerce, no build step, no licence server.
 
 | Shortcode | Shows |
 | --- | --- |
-| `[lset_events upcoming="1" order="asc"]` | Upcoming events: image, date, venue, price, Book button. `limit="6"`, `past="1"` (past events only), `show_past="1"` with `upcoming="1"` (both). |
+| `[lset_events]` | Upcoming events, soonest first: image, date, venue, price, Book button. `limit="6"` shows only the next 6. |
+| `[lset_events past="1"]` | Past events only, newest first. Add `upcoming="1"` for both; `order="asc"` or `"desc"` to change the order. |
 | `[lset_event id="123"]` | One event's details and booking box, for an Elementor page. `details="0"` for just the booking box. |
 
 Each event also has its own page at `/events/<event-name>/` (the slug is a setting).
@@ -43,7 +46,11 @@ Each event also has its own page at `/events/<event-name>/` (the slug is a setti
 
 **Create an event.** Events → Add event. Fill in the title, description and featured image. In *Event
 details* set the dates, times and venue, and leave *Take bookings* ticked (untick it for info-only events).
-Add tickets in *Tickets*. Pick fields in *Checkout fields*. Publish.
+Set *Tickets on sale* if they shouldn't go on sale straight away. Add tickets in *Tickets*. Pick fields in
+*Checkout fields*. Publish.
+
+**List events on the site.** Events → Settings → *Event pages*: **Create "Events" page** and **Create
+"Past events" page**, then add them to the menu. Or put `[lset_events]` on any page.
 
 **Make next year's event.** Events → All events, hover the event, **Duplicate for next year**. Choose
 "same date" or "same weekday" (52 weeks later). The copy is a draft with the same tickets, groups and

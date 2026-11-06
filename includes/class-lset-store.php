@@ -44,6 +44,11 @@ class LSET_Store {
 			'bookings'    => (bool) get_post_meta( $id, '_lset_bookings', true ),
 			'closed_msg'  => (string) get_post_meta( $id, '_lset_closed_msg', true ),
 			'name_fields' => self::name_fields_mode( $id ),
+			// When tickets are on sale, for the whole event.
+			'sale_mode'   => (string) get_post_meta( $id, '_lset_sale_mode', true ),
+			'sale_start'  => (string) get_post_meta( $id, '_lset_sale_start', true ),
+			'sale_days'   => '' === get_post_meta( $id, '_lset_sale_days', true ) ? null : (int) get_post_meta( $id, '_lset_sale_days', true ),
+			'sale_end'    => (string) get_post_meta( $id, '_lset_sale_end', true ),
 			'venue'       => $venue,
 			'url'         => get_permalink( $post ),
 		);
@@ -338,21 +343,89 @@ class LSET_Store {
 	 * When a ticket is on sale
 	 * ------------------------------------------------------------------ */
 
-	/** Sale start as a local datetime string, or '' (on sale now). */
-	public static function sale_start( array $ticket, array $event ) {
-		if ( 'date' === $ticket['sale_start_mode'] && $ticket['sale_start'] ) {
-			return $ticket['sale_start'];
+	/**
+	 * When the event's tickets go on sale, as a local datetime string, or '' (on sale now).
+	 * The window is set once per event; $ticket is unused and kept for callers.
+	 */
+	public static function sale_start( $ticket, array $event ) {
+		unset( $ticket );
+		return self::window_start( $event['sale_mode'], $event['sale_start'], $event['sale_days'], $event );
+	}
+
+	/** When sales end, as a local datetime string: the event's own, else the event start. */
+	public static function sale_end( $ticket, array $event ) {
+		unset( $ticket );
+		return $event['sale_end'] ? $event['sale_end'] : $event['start'];
+	}
+
+	/** 'date' + datetime, or 'days' + N (midnight N days before the event day, local time), or '' = now. */
+	private static function window_start( $mode, $start, $days, array $event ) {
+		if ( 'date' === $mode && $start ) {
+			return $start;
 		}
-		if ( 'days' === $ticket['sale_start_mode'] && null !== $ticket['sale_start_days'] && $event['start'] ) {
-			// Midnight N days before the event day, in local time, so it doesn't drift across a clock change.
-			return LSET_Time::shift( substr( $event['start'], 0, 10 ) . ' 00:00:00', '-' . (int) $ticket['sale_start_days'] . ' days', $event['tz'] );
+		if ( 'days' === $mode && null !== $days && '' !== $days && $event['start'] ) {
+			return LSET_Time::shift( substr( $event['start'], 0, 10 ) . ' 00:00:00', '-' . (int) $days . ' days', $event['tz'] );
 		}
 		return '';
 	}
 
-	/** Sale end as a local datetime string: the ticket's own, else the event start. */
-	public static function sale_end( array $ticket, array $event ) {
-		return $ticket['sale_end'] ? $ticket['sale_end'] : $event['start'];
+	/**
+	 * Save an event's sale window.
+	 *
+	 * @param int    $event_id Event.
+	 * @param string $mode     '', 'date' or 'days'.
+	 * @param string $start    Local datetime (for 'date').
+	 * @param mixed  $days     Days before the event (for 'days').
+	 * @param string $end      Local datetime, or '' for the event start.
+	 */
+	public static function save_sale_window( $event_id, $mode, $start, $days, $end ) {
+		$mode = in_array( $mode, array( 'date', 'days' ), true ) ? $mode : '';
+		update_post_meta( $event_id, '_lset_sale_mode', $mode );
+		update_post_meta( $event_id, '_lset_sale_start', 'date' === $mode ? (string) $start : '' );
+		update_post_meta( $event_id, '_lset_sale_days', 'days' === $mode && '' !== (string) $days && null !== $days ? max( 0, (int) $days ) : '' );
+		update_post_meta( $event_id, '_lset_sale_end', (string) $end );
+	}
+
+	/**
+	 * Work out one sale window for an event from its tickets' old per-ticket windows: it opens
+	 * when the first ticket did and closes when the last one did. Used once on upgrade, and by
+	 * the EventPrime migrator, which reads per-ticket windows.
+	 */
+	public static function sale_window_from_tickets( $event_id ) {
+		$event   = self::event( $event_id );
+		$tickets = self::tickets( $event_id, false );
+		$tickets = $tickets ? $tickets : self::tickets( $event_id );
+		if ( ! $event || ! $tickets ) {
+			return;
+		}
+		$starts = array();
+		$days   = array();
+		$ends   = array();
+		$now    = false;
+		foreach ( $tickets as $t ) {
+			$s = self::window_start( $t['sale_start_mode'], $t['sale_start'], $t['sale_start_days'], $event );
+			if ( '' === $s ) {
+				$now = true;
+			} else {
+				$starts[] = $s;
+			}
+			$days[] = 'days' === $t['sale_start_mode'] ? $t['sale_start_days'] : null;
+			$ends[] = $t['sale_end'];
+		}
+		$mode  = '';
+		$start = '';
+		$n     = null;
+		if ( ! $now ) {
+			if ( ! in_array( null, $days, true ) ) {
+				$mode = 'days';
+				$n    = max( $days );
+			} else {
+				$mode  = 'date';
+				$start = min( $starts );
+			}
+		}
+		$end = in_array( '', $ends, true ) ? '' : max( $ends );
+		self::save_sale_window( $event_id, $mode, $start, $n, $end );
 	}
 
 	/**
@@ -379,8 +452,14 @@ class LSET_Store {
 		return '';
 	}
 
-	/** The most one order can have of a ticket. */
-	public static function max_per_order( array $ticket ) {
-		return $ticket['max_qty'] > 0 ? $ticket['max_qty'] : (int) Lumaha_Simple_Event_Tickets::setting( 'default_max' );
+	/**
+	 * The most of one ticket the booking box offers in one go. There's no per-order limit to set;
+	 * this only keeps the quantity list a sensible length (capacity can lower it further).
+	 */
+	const MAX_PER_ORDER = 50;
+
+	public static function max_per_order( $ticket = null ) {
+		unset( $ticket );
+		return self::MAX_PER_ORDER;
 	}
 }

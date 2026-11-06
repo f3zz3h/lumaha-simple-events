@@ -114,9 +114,9 @@ class LSET_Frontend {
 	public static function shortcode_events( $atts ) {
 		$atts = shortcode_atts(
 			array(
-				'upcoming'  => '1',
+				'upcoming'  => '', // Default: yes, unless past="1" is given.
 				'past'      => '0',
-				'order'     => 'asc',
+				'order'     => '', // Default: soonest first; newest first for past events.
 				'limit'     => '-1',
 				'show_past' => '0', // Same as past="1".
 			),
@@ -124,8 +124,11 @@ class LSET_Frontend {
 			'lset_events'
 		);
 		self::enqueue();
-		$order = 'desc' === strtolower( $atts['order'] ) ? 'DESC' : 'ASC';
-		$args  = array(
+		$past     = '1' === (string) $atts['past'] || '1' === (string) $atts['show_past'];
+		$upcoming = '' === (string) $atts['upcoming'] ? ! $past : '1' === (string) $atts['upcoming'];
+		$order    = strtolower( (string) $atts['order'] );
+		$order    = '' === $order ? ( $past && ! $upcoming ? 'DESC' : 'ASC' ) : ( 'desc' === $order ? 'DESC' : 'ASC' );
+		$args     = array(
 			'post_type'      => LSET_CPT,
 			'post_status'    => 'publish',
 			'posts_per_page' => (int) $atts['limit'] ? (int) $atts['limit'] : -1,
@@ -133,8 +136,6 @@ class LSET_Frontend {
 			'orderby'        => 'meta_value_num',
 			'order'          => $order,
 		);
-		$past     = '1' === (string) $atts['past'] || '1' === (string) $atts['show_past'];
-		$upcoming = '1' === (string) $atts['upcoming'];
 		if ( $past && ! $upcoming ) {
 			$args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_query_meta_query
 				array(
@@ -156,7 +157,8 @@ class LSET_Frontend {
 		}
 		$q = new WP_Query( $args );
 		if ( ! $q->have_posts() ) {
-			return '<div class="lset-events lset-events--empty"><p>' . esc_html__( 'No events coming up just now. Please check back soon.', 'lumaha-simple-event-tickets' ) . '</p></div>';
+			$none = $past && ! $upcoming ? __( 'No past events yet.', 'lumaha-simple-event-tickets' ) : __( 'No events coming up just now. Please check back soon.', 'lumaha-simple-event-tickets' );
+			return '<div class="lset-events lset-events--empty"><p>' . esc_html( $none ) . '</p></div>';
 		}
 		$html = '<div class="lset-events">';
 		foreach ( $q->posts as $post ) {
@@ -309,9 +311,9 @@ class LSET_Frontend {
 							<?php endif; ?>
 							<span class="lset-ticket__left"></span>
 						</div>
-						<select class="lset-qty" id="lset-qty-<?php echo (int) $t['id']; ?>" name="lset_qty[<?php echo (int) $t['id']; ?>]" data-min="<?php echo (int) $t['min_qty']; ?>" data-max="<?php echo (int) $max; ?>" disabled>
+						<select class="lset-qty" id="lset-qty-<?php echo (int) $t['id']; ?>" name="lset_qty[<?php echo (int) $t['id']; ?>]" data-min="0" data-max="<?php echo (int) $max; ?>" disabled>
 							<option value="0">0</option>
-							<?php for ( $n = max( 1, $t['min_qty'] ); $n <= $max; $n++ ) : ?>
+							<?php for ( $n = 1; $n <= $max; $n++ ) : ?>
 								<option value="<?php echo (int) $n; ?>" <?php selected( $selected, $n ); ?>><?php echo (int) $n; ?></option>
 							<?php endfor; ?>
 						</select>
@@ -416,14 +418,14 @@ class LSET_Frontend {
 		foreach ( $tickets as $t ) {
 			$state = LSET_Store::sale_state( $t, $e );
 			$l     = isset( $left[ $t['id'] ] ) ? $left[ $t['id'] ] : null;
-			if ( '' === $state && null !== $l && $l < max( 1, $t['min_qty'] ) ) {
+			if ( '' === $state && null !== $l && $l < 1 ) {
 				$state = 'sold_out';
 			}
 			$max  = LSET_Store::max_per_order( $t );
 			$row  = array(
 				'state'     => $state,
 				'max'       => null === $l ? $max : min( $max, $l ),
-				'min'       => $t['min_qty'],
+				'min'       => 0,
 				'left'      => null,
 				'message'   => '',
 			);

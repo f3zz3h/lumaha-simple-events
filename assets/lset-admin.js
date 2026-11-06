@@ -1,6 +1,16 @@
-/* Lumaha Simple Event Tickets: ticket rows on the event screen (add, remove, drag to reorder, sale-start mode). */
+/* Lumaha Simple Event Tickets: the event screen (on-sale options; ticket rows: add, remove, drag to reorder). */
 ( function () {
 	'use strict';
+	// Event-level "Tickets on sale": show the date or days input for the chosen option.
+	document.querySelectorAll( '.lset-sale' ).forEach( function ( box ) {
+		var s = box.querySelector( '.lset-sale-mode' );
+		if ( s ) {
+			s.addEventListener( 'change', function () {
+				box.setAttribute( 'data-mode', s.value );
+			} );
+		}
+	} );
+
 	var table = document.querySelector( '.lset-tickets tbody' );
 	var tpl = document.getElementById( 'lset-ticket-template' );
 	if ( ! table || ! tpl ) {
