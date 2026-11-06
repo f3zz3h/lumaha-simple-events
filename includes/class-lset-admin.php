@@ -167,6 +167,22 @@ class LSET_Admin {
 		$groups  = LSET_Store::groups( $post->ID );
 		$sold    = $post->ID ? LSET_Capacity::taken( $post->ID ) : array();
 		?>
+		<h4><?php esc_html_e( 'Ticket groups', 'lumaha-simple-event-tickets' ); ?></h4>
+		<p class="description"><?php esc_html_e( 'Optional. A group lets several tickets share one limit, e.g. "Volunteering" capped at 6 across all volunteer slots. Add groups here, then pick one on each ticket below. Tickets with "No group" just use their own capacity. Buyers don\'t see groups.', 'lumaha-simple-event-tickets' ); ?></p>
+		<table class="widefat lset-groups">
+			<thead><tr><th><?php esc_html_e( 'Group', 'lumaha-simple-event-tickets' ); ?></th><th><?php esc_html_e( 'Shared capacity', 'lumaha-simple-event-tickets' ); ?></th><th></th></tr></thead>
+			<tbody>
+			<?php
+			foreach ( $groups as $g ) {
+				self::group_row( $g );
+			}
+			?>
+			</tbody>
+		</table>
+		<template id="lset-group-template"><?php self::group_row( null ); ?></template>
+		<p><button type="button" class="button lset-add-group"><?php esc_html_e( 'Add group', 'lumaha-simple-event-tickets' ); ?></button></p>
+
+		<h4><?php esc_html_e( 'Tickets', 'lumaha-simple-event-tickets' ); ?></h4>
 		<p class="description"><?php esc_html_e( 'Leave capacity blank for no limit. The box under it is optional: e.g. 5 shows buyers "Only 5 left" once 5 or fewer remain. Price 0 means free (it still goes through the checkout as a £0 order). When tickets go on sale is set once, in Event details above. Drag the ⇅ handle to reorder.', 'lumaha-simple-event-tickets' ); ?></p>
 		<table class="widefat lset-tickets">
 			<thead>
@@ -190,29 +206,22 @@ class LSET_Admin {
 		</table>
 		<template id="lset-ticket-template"><?php self::ticket_row( null, $groups, 0 ); ?></template>
 		<p><button type="button" class="button lset-add-ticket"><?php esc_html_e( 'Add ticket', 'lumaha-simple-event-tickets' ); ?></button></p>
-		<datalist id="lset-group-names">
-			<?php foreach ( $groups as $g ) : ?>
-				<option value="<?php echo esc_attr( $g['name'] ); ?>"></option>
-			<?php endforeach; ?>
-		</datalist>
-
-		<h4><?php esc_html_e( 'Ticket groups', 'lumaha-simple-event-tickets' ); ?></h4>
-		<p class="description"><?php esc_html_e( 'Type a group name on tickets that share a limit (e.g. "Volunteering", "Grotto"). The group appears here after saving, where you can give it a shared capacity.', 'lumaha-simple-event-tickets' ); ?></p>
-		<?php if ( $groups ) : ?>
-			<table class="widefat lset-groups">
-				<thead><tr><th><?php esc_html_e( 'Group', 'lumaha-simple-event-tickets' ); ?></th><th><?php esc_html_e( 'Shared capacity', 'lumaha-simple-event-tickets' ); ?></th></tr></thead>
-				<tbody>
-				<?php foreach ( $groups as $g ) : ?>
-					<tr>
-						<td><?php echo esc_html( $g['name'] ); ?></td>
-						<td><input type="number" min="0" step="1" name="lset_groups[<?php echo (int) $g['id']; ?>][capacity]" value="<?php echo esc_attr( null === $g['capacity'] ? '' : $g['capacity'] ); ?>" placeholder="<?php esc_attr_e( 'no limit', 'lumaha-simple-event-tickets' ); ?>"></td>
-					</tr>
-				<?php endforeach; ?>
-				</tbody>
-			</table>
-		<?php endif; ?>
 		<?php
 		unset( $event );
+	}
+
+	/** One group row. $g null = the blank template row (key __g__, swapped for a new key by the script). */
+	private static function group_row( $g ) {
+		$key  = $g ? (string) $g['id'] : '__g__';
+		$name = 'lset_groups[' . $key . ']';
+		?>
+		<tr class="lset-group" data-key="<?php echo esc_attr( $key ); ?>">
+			<td><input type="text" class="lset-w-group lset-group-name" name="<?php echo esc_attr( $name ); ?>[name]" value="<?php echo esc_attr( $g ? $g['name'] : '' ); ?>" placeholder="<?php esc_attr_e( 'e.g. Volunteering', 'lumaha-simple-event-tickets' ); ?>">
+				<input type="hidden" class="lset-delete-flag" name="<?php echo esc_attr( $name ); ?>[delete]" value="0"></td>
+			<td><input type="number" min="0" step="1" class="lset-w-num" name="<?php echo esc_attr( $name ); ?>[capacity]" value="<?php echo esc_attr( $g && null !== $g['capacity'] ? $g['capacity'] : '' ); ?>" placeholder="<?php esc_attr_e( 'no limit', 'lumaha-simple-event-tickets' ); ?>"></td>
+			<td><button type="button" class="button-link lset-remove" aria-label="<?php esc_attr_e( 'Remove group', 'lumaha-simple-event-tickets' ); ?>">✕</button></td>
+		</tr>
+		<?php
 	}
 
 	/**
@@ -231,7 +240,6 @@ class LSET_Admin {
 			'hidden'          => false,
 			'show_left_below' => null,
 		);
-		$group = $t['group_id'] && isset( $groups[ $t['group_id'] ] ) ? $groups[ $t['group_id'] ]['name'] : '';
 		$fmt   = function ( $v ) {
 			return '' === $v || null === $v ? '' : (string) $v;
 		};
@@ -251,7 +259,14 @@ class LSET_Admin {
 				<input type="number" min="0" step="1" class="lset-w-num" name="<?php echo esc_attr( $name ); ?>[capacity]" value="<?php echo esc_attr( $fmt( $t['capacity'] ) ); ?>" placeholder="<?php esc_attr_e( 'no limit', 'lumaha-simple-event-tickets' ); ?>">
 				<label class="lset-small lset-left-at" title="<?php esc_attr_e( 'Optional. Once this many or fewer are left, buyers see "Only 3 left" next to the ticket. Leave blank to never show it.', 'lumaha-simple-event-tickets' ); ?>"><?php esc_html_e( 'Say "only N left" at', 'lumaha-simple-event-tickets' ); ?> <input type="number" min="0" step="1" class="lset-w-tiny" name="<?php echo esc_attr( $name ); ?>[show_left_below]" value="<?php echo esc_attr( $fmt( $t['show_left_below'] ) ); ?>" placeholder="<?php esc_attr_e( 'off', 'lumaha-simple-event-tickets' ); ?>"></label>
 			</td>
-			<td><input type="text" list="lset-group-names" class="lset-w-group" name="<?php echo esc_attr( $name ); ?>[group]" value="<?php echo esc_attr( $group ); ?>"></td>
+			<td>
+				<select class="lset-group-pick" name="<?php echo esc_attr( $name ); ?>[group]">
+					<option value=""><?php esc_html_e( 'No group', 'lumaha-simple-event-tickets' ); ?></option>
+					<?php foreach ( $groups as $g ) : ?>
+						<option value="<?php echo (int) $g['id']; ?>" <?php selected( $t['group_id'], $g['id'] ); ?>><?php echo esc_html( $g['name'] ); ?></option>
+					<?php endforeach; ?>
+				</select>
+			</td>
 			<td><?php echo (int) $sold; ?></td>
 			<td><button type="button" class="button-link lset-remove" aria-label="<?php esc_attr_e( 'Remove ticket', 'lumaha-simple-event-tickets' ); ?>">✕</button></td>
 		</tr>
@@ -365,26 +380,44 @@ class LSET_Admin {
 			LSET_Store::set_event_fields( $post_id, $level, $list );
 		}
 
-		// Groups: shared capacities.
+		// Groups first, so tickets can point at new ones. Keys are group ids, or "n1", "n2"… for new rows.
 		$existing_groups = LSET_Store::groups( $post_id );
 		$group_in        = isset( $_POST['lset_groups'] ) && is_array( $_POST['lset_groups'] ) ? wp_unslash( $_POST['lset_groups'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		foreach ( $group_in as $gid => $g ) {
-			$gid = absint( $gid );
-			if ( isset( $existing_groups[ $gid ] ) ) {
-				$existing_groups[ $gid ]['capacity'] = isset( $g['capacity'] ) ? $g['capacity'] : '';
-				LSET_Store::save_group( $existing_groups[ $gid ] );
+		$group_map       = array(); // Form key => group id (0 = deleted or blank).
+		$g_order         = 0;
+		foreach ( $group_in as $key => $g ) {
+			$key = (string) $key;
+			if ( '__g__' === $key ) {
+				continue;
 			}
-		}
-		$group_by_name = array();
-		foreach ( $existing_groups as $g ) {
-			$group_by_name[ strtolower( $g['name'] ) ] = $g['id'];
+			$gid  = ctype_digit( $key ) ? (int) $key : 0;
+			$name = isset( $g['name'] ) ? trim( sanitize_text_field( $g['name'] ) ) : '';
+			if ( $gid && ! isset( $existing_groups[ $gid ] ) ) {
+				continue; // Not this event's group.
+			}
+			if ( ! empty( $g['delete'] ) || '' === $name ) {
+				if ( $gid && ! empty( $g['delete'] ) ) {
+					LSET_Store::delete_group( $gid );
+				}
+				$group_map[ $key ] = $gid && empty( $g['delete'] ) ? $gid : 0;
+				continue;
+			}
+			$group_map[ $key ] = LSET_Store::save_group(
+				array(
+					'id'         => $gid,
+					'event_id'   => $post_id,
+					'name'       => $name,
+					'capacity'   => isset( $g['capacity'] ) ? $g['capacity'] : '',
+					'sort_order' => $g_order++,
+					'ep_id'      => $gid ? $existing_groups[ $gid ]['ep_id'] : null,
+				)
+			);
 		}
 
 		// Tickets, in the order they appear on the form.
 		$tickets_in = isset( $_POST['lset_tickets'] ) && is_array( $_POST['lset_tickets'] ) ? wp_unslash( $_POST['lset_tickets'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$existing   = LSET_Store::tickets( $post_id );
 		$order      = 0;
-		$used_group = array();
 		foreach ( $tickets_in as $key => $t ) {
 			if ( '__i__' === $key ) {
 				continue;
@@ -403,23 +436,8 @@ class LSET_Admin {
 			if ( '' === $name ) {
 				continue;
 			}
-			$group_name = isset( $t['group'] ) ? trim( sanitize_text_field( $t['group'] ) ) : '';
-			$gid        = 0;
-			if ( '' !== $group_name ) {
-				$k = strtolower( $group_name );
-				if ( ! isset( $group_by_name[ $k ] ) ) {
-					$group_by_name[ $k ] = LSET_Store::save_group(
-						array(
-							'event_id'   => $post_id,
-							'name'       => $group_name,
-							'capacity'   => null,
-							'sort_order' => count( $group_by_name ),
-						)
-					);
-				}
-				$gid                = $group_by_name[ $k ];
-				$used_group[ $gid ] = true;
-			}
+			$pick = isset( $t['group'] ) ? sanitize_key( $t['group'] ) : '';
+			$gid  = isset( $group_map[ $pick ] ) ? $group_map[ $pick ] : 0;
 			$current = $id ? $existing[ $id ] : array();
 			LSET_Store::save_ticket(
 				array(
@@ -438,20 +456,6 @@ class LSET_Admin {
 			);
 		}
 
-		// Groups no ticket uses any more.
-		foreach ( LSET_Store::groups( $post_id ) as $g ) {
-			if ( empty( $used_group[ $g['id'] ] ) ) {
-				$in_use = false;
-				foreach ( LSET_Store::tickets( $post_id ) as $t ) {
-					if ( $t['group_id'] === $g['id'] ) {
-						$in_use = true;
-					}
-				}
-				if ( ! $in_use ) {
-					LSET_Store::delete_group( $g['id'] );
-				}
-			}
-		}
 		unset( $post );
 	}
 
@@ -715,6 +719,7 @@ class LSET_Admin {
 					<tr><th><label for="lset_hold"><?php esc_html_e( 'Hold tickets in a basket for', 'lumaha-simple-event-tickets' ); ?></label></th><td><input type="number" min="1" max="120" id="lset_hold" name="hold_minutes" class="small-text" value="<?php echo (int) $s['hold_minutes']; ?>"> <?php esc_html_e( 'minutes', 'lumaha-simple-event-tickets' ); ?></td></tr>
 					<tr><th><?php esc_html_e( 'Complete ticket orders', 'lumaha-simple-event-tickets' ); ?></th><td><label><input type="checkbox" name="auto_complete" value="1" <?php checked( $s['auto_complete'] ); ?>> <?php esc_html_e( 'Mark paid (and free) orders that only hold event tickets as Completed straight away', 'lumaha-simple-event-tickets' ); ?></label></td></tr>
 					<tr><th><label for="lset_slug"><?php esc_html_e( 'Event address', 'lumaha-simple-event-tickets' ); ?></label></th><td><code><?php echo esc_html( home_url( '/' ) ); ?></code><input type="text" id="lset_slug" name="event_slug" class="regular-text" value="<?php echo esc_attr( $s['event_slug'] ); ?>"><code>/&lt;event-name&gt;/</code></td></tr>
+					<tr><th><?php esc_html_e( 'Event page sidebar', 'lumaha-simple-event-tickets' ); ?></th><td><label><input type="checkbox" name="event_sidebar" value="1" <?php checked( ! empty( $s['event_sidebar'] ) ); ?>> <?php esc_html_e( 'Show the theme\'s sidebar on event pages (off: event pages are full width)', 'lumaha-simple-event-tickets' ); ?></label></td></tr>
 					<tr><th><?php esc_html_e( 'When the plugin is deleted', 'lumaha-simple-event-tickets' ); ?></th><td><label><input type="checkbox" name="delete_on_remove" value="1" <?php checked( $s['delete_on_remove'] ); ?>> <?php esc_html_e( 'Delete all events, tickets, bookings and attendee details. Orders are never touched.', 'lumaha-simple-event-tickets' ); ?></label></td></tr>
 				</table>
 				<?php submit_button(); ?>
@@ -747,7 +752,19 @@ class LSET_Admin {
 				<?php endforeach; ?>
 				</tbody>
 			</table>
-			<p class="description"><?php esc_html_e( 'Options: limit="6" shows only the next 6; order="desc" shows newest first. Past events are listed newest first already.', 'lumaha-simple-event-tickets' ); ?></p>
+			<h3><?php esc_html_e( 'Display options', 'lumaha-simple-event-tickets' ); ?></h3>
+			<p><?php esc_html_e( 'Add any of these inside the shortcode, e.g.', 'lumaha-simple-event-tickets' ); ?> <code>[lset_events layout="list" limit="4" price="0"]</code></p>
+			<table class="widefat striped lset-pages">
+				<tbody>
+					<tr><td><code>layout="grid"</code> / <code>"list"</code> / <code>"compact"</code></td><td><?php esc_html_e( 'Cards in a grid (default); one wide row per event with the picture at the side; or a simple list of dates and titles.', 'lumaha-simple-event-tickets' ); ?></td></tr>
+					<tr><td><code>columns="2"</code></td><td><?php esc_html_e( 'Grid only: up to 1–4 cards per row on a wide screen (default 3).', 'lumaha-simple-event-tickets' ); ?></td></tr>
+					<tr><td><code>limit="6"</code></td><td><?php esc_html_e( 'Show only this many events.', 'lumaha-simple-event-tickets' ); ?></td></tr>
+					<tr><td><code>order="asc"</code> / <code>"desc"</code></td><td><?php esc_html_e( 'Soonest or newest first. Upcoming lists default to soonest first, past lists to newest first.', 'lumaha-simple-event-tickets' ); ?></td></tr>
+					<tr><td><code>image="0"</code> <code>excerpt="0"</code> <code>venue="0"</code> <code>price="0"</code> <code>button="0"</code></td><td><?php esc_html_e( 'Hide the picture, the short description, the venue, the "from" price or the Book / More info button.', 'lumaha-simple-event-tickets' ); ?></td></tr>
+					<tr><td><code>where="School Hall"</code></td><td><?php esc_html_e( 'Only events at this venue.', 'lumaha-simple-event-tickets' ); ?></td></tr>
+					<tr><td><code>year="2025"</code></td><td><?php esc_html_e( 'Only events in that year (handy for a past events archive).', 'lumaha-simple-event-tickets' ); ?></td></tr>
+				</tbody>
+			</table>
 		</div>
 		<?php
 	}
@@ -828,6 +845,7 @@ class LSET_Admin {
 			'hold_minutes'     => isset( $_POST['hold_minutes'] ) ? min( 120, max( 1, (int) $_POST['hold_minutes'] ) ) : 15,
 			'auto_complete'    => empty( $_POST['auto_complete'] ) ? 0 : 1,
 			'event_slug'       => $slug ? $slug : 'events',
+			'event_sidebar'    => empty( $_POST['event_sidebar'] ) ? 0 : 1,
 			'delete_on_remove' => empty( $_POST['delete_on_remove'] ) ? 0 : 1,
 		);
 		update_option( 'lset_settings', array_merge( $old, $new ) );

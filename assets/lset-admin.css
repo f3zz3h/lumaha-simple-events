@@ -12,7 +12,7 @@
 span.lset-small { display: inline; }
 .lset-col-sort { width: 20px; }
 .lset-handle { cursor: move; font-size: 16px; color: #8c8f94; }
-.lset-ticket.is-deleted { opacity: .35; }
+.lset-ticket.is-deleted, .lset-group.is-deleted { opacity: .35; }
 .lset-ticket.is-dragging { opacity: .5; }
 .lset-sale-date, .lset-sale-days { display: none; margin-top: 4px; }
 .lset-sale[data-mode=date] .lset-sale-date, .lset-sale[data-mode=days] .lset-sale-days { display: inline-block; }

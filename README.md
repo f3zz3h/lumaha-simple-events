@@ -13,9 +13,13 @@ WordPress and WooCommerce, no build step, no licence server.
   when tickets go on sale (now, a date, or N days before) and when sales close (default: event start),
   and a message for when bookings are closed. Times are saved exactly as typed, in the site timezone.
 - **Tickets** per event: price (0 = free), capacity, hidden, an optional "only N left" note when low, and
-  optional **groups** that share a capacity (e.g. "Volunteering" capped at 40 across all volunteer slots).
+  an optional **group**. Groups are set up above the tickets and picked from a list on each one; a group's
+  tickets share its capacity (e.g. "Volunteering" capped at 40 across all volunteer slots).
   There's no per-order limit; the quantity list goes up to 50 or what's left.
-- **Event lists**: Events → Settings → *Event pages* makes an "Events" and a "Past events" page in one click.
+- **Event lists**: Events → Settings → *Event pages* makes an "Events" and a "Past events" page in one click,
+  and lists the display options (grid, list or compact; columns; what to show; by venue or year).
+- **Event pages are full width**: the theme's sidebar is hidden on event pages (a setting brings it back), and the content widens to fill the space.
+- **Previous / next event** links under an event follow the event date, and themes' "Previous Post" / "Next Post" labels read "Previous event" / "Next event".
 - **Checkout fields** (Events → Checkout fields): a reusable list (text, number, long text, drop-down,
   tick box). Each event picks which to ask **for each ticket** (child's class, dietary needs) or **once per
   booking** (contact phone), and which are required.
@@ -41,6 +45,7 @@ WordPress and WooCommerce, no build step, no licence server.
 | --- | --- |
 | `[lset_events]` | Upcoming events, soonest first: image, date, venue, price, Book button. `limit="6"` shows only the next 6. |
 | `[lset_events past="1"]` | Past events only, newest first. Add `upcoming="1"` for both; `order="asc"` or `"desc"` to change the order. |
+| Display options (either list) | `layout="grid"` (default), `"list"` (wide rows, picture at the side) or `"compact"` (dates and titles); `columns="2"` (grid, 1–4); `image="0"`, `excerpt="0"`, `venue="0"`, `price="0"`, `button="0"` to hide parts; `where="School Hall"` (one venue); `year="2025"`. |
 | `[lset_event id="123"]` | One event's details and booking box, for an Elementor page. `details="0"` for just the booking box. |
 | `[lset_gallery id="123"]` | One event's photo gallery, once the event has finished. `any="1"` shows it straight away. |
 
