@@ -27,6 +27,9 @@ tests_add_filter(
 		update_option( 'woocommerce_custom_orders_table_data_sync_enabled', 'no' );
 		require $lset_wc_dir . '/woocommerce.php';
 		require $lset_root . '/lumaha-simple-event-tickets.php';
+		// The one-off EventPrime migrator add-on. Its command only loads under WP-CLI, so load the class too.
+		require $lset_root . '/addons/lumaha-set-eventprime-migrator/lumaha-set-eventprime-migrator.php';
+		require $lset_root . '/addons/lumaha-set-eventprime-migrator/includes/class-lset-migrate.php';
 	}
 );
 

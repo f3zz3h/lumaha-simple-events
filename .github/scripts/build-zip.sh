@@ -52,6 +52,19 @@ fi
 rm -rf "$STAGE"
 
 echo "Built $ZIP ($(du -h "$ZIP" | cut -f1)), version $header_version"
+
+# The one-off EventPrime migrator is its own small plugin, zipped separately.
+ADDON="lumaha-set-eventprime-migrator"
+addon_version="$(sed -n 's/^ \* Version:[[:space:]]*\([^[:space:]]*\).*/\1/p' "$ROOT/addons/$ADDON/$ADDON.php" | head -1)"
+ADDON_ZIP="$DIST/$ADDON-$addon_version.zip"
+rm -f "$ADDON_ZIP"
+if command -v zip > /dev/null; then
+	(cd "$ROOT/addons" && zip -qr -X "$ADDON_ZIP" "$ADDON")
+else
+	python3 -c 'import shutil, sys; shutil.make_archive(sys.argv[1][:-4], "zip", sys.argv[2], sys.argv[3])' "$ADDON_ZIP" "$ROOT/addons" "$ADDON"
+fi
+echo "Built $ADDON_ZIP ($(du -h "$ADDON_ZIP" | cut -f1)), version $addon_version"
+
 if [ -n "${GITHUB_OUTPUT:-}" ]; then
-	{ echo "zip=$ZIP"; echo "version=$header_version"; echo "name=$(basename "$ZIP")"; } >> "$GITHUB_OUTPUT"
+	{ echo "zip=$ZIP"; echo "version=$header_version"; echo "name=$(basename "$ZIP")"; echo "addon_zip=$ADDON_ZIP"; echo "addon_name=$(basename "$ADDON_ZIP")"; } >> "$GITHUB_OUTPUT"
 fi

@@ -33,6 +33,45 @@ class LSET_Orders {
 		add_action( 'woocommerce_untrash_order', array( __CLASS__, 'sync' ) );
 
 		add_filter( 'woocommerce_payment_complete_order_status', array( __CLASS__, 'auto_complete' ), 10, 3 );
+		add_filter( 'woocommerce_order_item_get_formatted_meta_data', array( __CLASS__, 'old_eventprime_meta' ), 10, 2 );
+	}
+
+	/**
+	 * Old EventPrime orders keep their own line meta. Once EventPrime is off, nothing formats it,
+	 * so show ep_tickets_data as "2 × Adult" and the booking id as plain text (admin only).
+	 */
+	public static function old_eventprime_meta( $meta, $item ) {
+		foreach ( $meta as $id => $m ) {
+			if ( 'ep_booking_id' === $m->key ) {
+				if ( is_admin() ) {
+					$m->display_key   = __( 'EventPrime booking', 'lumaha-simple-event-tickets' );
+					$m->display_value = '#' . absint( $m->value );
+				} else {
+					unset( $meta[ $id ] );
+				}
+			} elseif ( 'ep_tickets_data' === $m->key ) {
+				$lines = array();
+				$data  = is_array( $m->value ) ? $m->value : json_decode( (string) $m->value, true );
+				$data  = null === $data ? maybe_unserialize( $m->value ) : $data;
+				if ( is_array( $data ) && isset( $data['ticket_name'] ) ) {
+					$data = array( array( 'name' => $data['ticket_name'], 'qty' => isset( $data['qty'] ) ? $data['qty'] : 1 ) ); // One ticket type per line.
+				}
+				foreach ( is_array( $data ) ? $data : array() as $t ) {
+					if ( is_array( $t ) && isset( $t['name'] ) && is_scalar( $t['name'] ) ) {
+						$qty     = isset( $t['qty'] ) ? (int) $t['qty'] : 1;
+						$lines[] = $qty . ' × ' . $t['name'];
+					}
+				}
+				if ( $lines ) {
+					$m->display_key   = __( 'Tickets', 'lumaha-simple-event-tickets' );
+					$m->display_value = esc_html( implode( ', ', $lines ) );
+				} else {
+					unset( $meta[ $id ] );
+				}
+			}
+		}
+		unset( $item );
+		return $meta;
 	}
 
 	/** Copy the ticket and attendee details from the basket onto the order line. */
@@ -205,6 +244,22 @@ class LSET_Orders {
 		$placeholders = $seen ? implode( ',', array_fill( 0, count( $seen ), '%d' ) ) : '0';
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 		$wpdb->query( $wpdb->prepare( "UPDATE $table SET status = 'removed', updated_at = %s WHERE order_id = %d AND source IN ('checkout','manual') AND order_item_id NOT IN ($placeholders)", array_merge( array( $now, $order->get_id() ), $seen ) ) );
+
+		// Bookings copied from EventPrime follow their order: status, and refunds on their own line.
+		// Copies with no line (abandoned extra bookings on the order) keep the status they came with.
+		$migrated = $wpdb->get_results( $wpdb->prepare( "SELECT id, qty, order_item_id FROM $table WHERE order_id = %d AND source = 'migrated' AND order_item_id > 0", $order->get_id() ), ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		foreach ( $migrated as $m ) {
+			$refunded = 'refunded' === $status ? (int) $m['qty'] : min( (int) $m['qty'], absint( $order->get_qty_refunded_for_item( (int) $m['order_item_id'] ) ) );
+			$wpdb->update(
+				$table,
+				array(
+					'status'       => $status,
+					'refunded_qty' => $refunded,
+					'updated_at'   => $now,
+				),
+				array( 'id' => (int) $m['id'] )
+			);
+		}
 	}
 
 	/** { field_id: value } → { field_id: { label, value } }, so the answers stay readable. */
