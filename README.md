@@ -64,7 +64,9 @@ Set *Tickets on sale* if they shouldn't go on sale straight away. Add tickets in
 *Checkout fields*. Publish.
 
 **List events on the site.** Events → Settings → *Event pages*: **Create "Events" page** and **Create
-"Past events" page**, then add them to the menu. Or put `[lset_events]` on any page.
+"Past events" page**, then add them to the menu. Or put `[lset_events]` on any page. If a page already
+has that address (say an old `/events/` page), choose **Replace it**, which moves the old page to Drafts at
+`/events-old/`, or **Keep it**, which makes the new page at `/events-2/`.
 
 **Make next year's event.** Events → All events, hover the event, **Duplicate for next year**. Choose
 "same date" or "same weekday" (52 weeks later). The copy is a draft with the same tickets, groups and
