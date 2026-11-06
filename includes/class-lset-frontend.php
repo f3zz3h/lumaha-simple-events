@@ -22,6 +22,76 @@ class LSET_Frontend {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'register_assets' ) );
 		add_action( 'rest_api_init', array( __CLASS__, 'rest_routes' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'maybe_full_width' ) );
+		add_action( 'template_redirect', array( __CLASS__, 'event_navigation' ) );
+		foreach ( array( 'previous', 'next' ) as $dir ) {
+			add_filter( "get_{$dir}_post_join", array( __CLASS__, 'adjacent_join' ), 10, 5 );
+			add_filter( "get_{$dir}_post_where", array( __CLASS__, 'adjacent_where' ), 10, 5 );
+			add_filter( "get_{$dir}_post_sort", array( __CLASS__, 'adjacent_sort' ), 10, 3 );
+		}
+	}
+
+	/** True when WordPress is finding the event before or after this one. */
+	private static function adjacent_event( $post ) {
+		$post = get_post( $post );
+		return $post && LSET_CPT === $post->post_type ? $post : null;
+	}
+
+	/** Previous/next event follows the event date, not the date the post was written. */
+	public static function adjacent_join( $join, $in_same_term = false, $excluded = '', $taxonomy = '', $post = null ) {
+		global $wpdb;
+		if ( self::adjacent_event( $post ) ) {
+			$join .= " INNER JOIN {$wpdb->postmeta} lset_s ON lset_s.post_id = p.ID AND lset_s.meta_key = '_lset_start_utc'";
+		}
+		return $join;
+	}
+
+	public static function adjacent_where( $where, $in_same_term = false, $excluded = '', $taxonomy = '', $post = null ) {
+		global $wpdb;
+		$post = self::adjacent_event( $post );
+		if ( ! $post ) {
+			return $where;
+		}
+		$before = 0 === strpos( current_filter(), 'get_previous' );
+		$op     = $before ? '<' : '>';
+		$start  = (int) get_post_meta( $post->ID, '_lset_start_utc', true );
+		$cond   = $wpdb->prepare(
+			"( CAST(lset_s.meta_value AS SIGNED) $op %d OR ( CAST(lset_s.meta_value AS SIGNED) = %d AND p.ID $op %d ) )", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$start,
+			$start,
+			$post->ID
+		);
+		return preg_replace( "/p\.post_date [<>] '[^']*'/", $cond, $where, 1 );
+	}
+
+	public static function adjacent_sort( $sort, $post = null, $order = '' ) {
+		if ( ! self::adjacent_event( $post ) ) {
+			return $sort;
+		}
+		$dir = 0 === strpos( current_filter(), 'get_previous' ) ? 'DESC' : 'ASC';
+		return "ORDER BY CAST(lset_s.meta_value AS SIGNED) $dir, p.ID $dir LIMIT 1";
+	}
+
+	/** Themes print "Previous Post" / "Next Post" under a post; on an event say "event". */
+	public static function event_navigation() {
+		if ( ! is_singular( LSET_CPT ) ) {
+			return;
+		}
+		add_filter( 'gettext', array( __CLASS__, 'event_nav_text' ), 10, 3 );
+		add_filter( 'gettext_with_context', array( __CLASS__, 'event_nav_text' ), 10, 3 );
+	}
+
+	public static function event_nav_text( $translation, $text, $domain = '' ) {
+		static $map = array(
+			'Previous Post' => 'Previous event',
+			'Next Post'     => 'Next event',
+			'Previous post' => 'Previous event',
+			'Next post'     => 'Next event',
+			'Post navigation' => 'Event navigation',
+		);
+		if ( isset( $map[ $text ] ) && 'lumaha-simple-event-tickets' !== $domain ) {
+			return __( $map[ $text ], 'lumaha-simple-event-tickets' ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
+		}
+		return $translation;
 	}
 
 	/**
@@ -52,6 +122,19 @@ class LSET_Frontend {
 				$layout['sidebar'] = 'none';
 				return $layout;
 			}
+		);
+		// XPro: the layout picks a wide column or a narrow one beside the sidebar.
+		$full = function () {
+			return 'full-layout';
+		};
+		add_filter( 'theme_mod_xpro_single_layout', $full );
+		add_filter(
+			'get_post_metadata',
+			function ( $value, $object_id, $key ) {
+				return 'xpro-sidebar-layout' === $key ? array( 'full-layout' ) : $value;
+			},
+			10,
+			3
 		);
 		add_filter( 'sidebars_widgets', array( __CLASS__, 'hide_sidebars' ) );
 		add_filter(

@@ -17,6 +17,9 @@
 /* Event pages without a sidebar, for themes that only hide it with CSS. */
 .lset-full-width #secondary, .lset-full-width .widget-area.sidebar, .lset-full-width aside.sidebar { display: none; }
 .lset-full-width #primary, .lset-full-width .content-area { width: 100%; max-width: 100%; float: none; }
+/* Grid themes that keep an empty sidebar column: drop it and widen the content column. */
+.lset-full-width .row > [class*="col-"]:empty { display: none; }
+.lset-full-width .row > [class*="col-"]:has(+ [class*="col-"]:empty), .lset-full-width .row > [class*="col-"]:empty + [class*="col-"] { flex: 0 0 100%; width: 100%; max-width: 100%; }
 .lset-card { display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,.12); border-radius: 8px; overflow: hidden; background: inherit; }
 .lset-card__media { display: block; aspect-ratio: 16 / 9; overflow: hidden; }
 .lset-card__img { width: 100%; height: 100%; object-fit: cover; display: block; }

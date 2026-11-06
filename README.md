@@ -18,7 +18,8 @@ WordPress and WooCommerce, no build step, no licence server.
   There's no per-order limit; the quantity list goes up to 50 or what's left.
 - **Event lists**: Events → Settings → *Event pages* makes an "Events" and a "Past events" page in one click,
   and lists the display options (grid, list or compact; columns; what to show; by venue or year).
-- **Event pages are full width**: the theme's sidebar is hidden on event pages (a setting brings it back).
+- **Event pages are full width**: the theme's sidebar is hidden on event pages (a setting brings it back), and the content widens to fill the space.
+- **Previous / next event** links under an event follow the event date, and themes' "Previous Post" / "Next Post" labels read "Previous event" / "Next event".
 - **Checkout fields** (Events → Checkout fields): a reusable list (text, number, long text, drop-down,
   tick box). Each event picks which to ask **for each ticket** (child's class, dietary needs) or **once per
   booking** (contact phone), and which are required.

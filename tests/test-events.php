@@ -153,4 +153,27 @@ class LSET_Test_Events extends LSET_Test_Case {
 		$this->assertSame( $groups[0]['id'], $tickets['Kept']['group_id'] );
 		$this->assertSame( 0, $tickets['Door']['group_id'] );
 	}
+
+	public function test_previous_and_next_follow_the_event_date() {
+		// Created out of order: post dates say c, a, b; event dates say a, b, c.
+		$c = $this->event( '2027-03-01 18:00:00', '2027-03-01 20:00:00' );
+		$a = $this->event( '2027-01-01 18:00:00', '2027-01-01 20:00:00' );
+		$b = $this->event( '2027-02-01 18:00:00', '2027-02-01 20:00:00' );
+		wp_update_post( array( 'ID' => $c, 'post_date' => '2020-01-01 00:00:00' ) );
+		wp_update_post( array( 'ID' => $a, 'post_date' => '2020-02-01 00:00:00' ) );
+		wp_update_post( array( 'ID' => $b, 'post_date' => '2020-03-01 00:00:00' ) );
+
+		$GLOBALS['post'] = get_post( $b );
+		$this->assertSame( $a, get_previous_post()->ID );
+		$this->assertSame( $c, get_next_post()->ID );
+		$GLOBALS['post'] = get_post( $a );
+		$this->assertSame( '', get_previous_post() );
+		$this->assertSame( $b, get_next_post()->ID );
+	}
+
+	public function test_post_navigation_says_event() {
+		$this->assertSame( 'Next event', LSET_Frontend::event_nav_text( 'Next Post', 'Next Post', 'xpro' ) );
+		$this->assertSame( 'Previous event', LSET_Frontend::event_nav_text( 'Previous post', 'Previous post', 'twentytwentyone' ) );
+		$this->assertSame( 'Other', LSET_Frontend::event_nav_text( 'Other', 'Other', 'xpro' ) );
+	}
 }
