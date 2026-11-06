@@ -19,6 +19,7 @@
  * - Every ticket goes in the basket as one hidden virtual product ("Event ticket"), with
  *   the ticket and attendee details in the cart item. Woo's checkout and gateways do the rest.
  * - Bookings and attendees are copied into our own tables from the order, and follow its status.
+ * - Each attendee gets a ticket with a QR code, emailed when the order is paid and scanned at the door.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -27,10 +28,11 @@ define( 'LSET_VERSION', '0.1.0' );
 define( 'LSET_PLUGIN_FILE', __FILE__ );
 define( 'LSET_DIR', __DIR__ . '/' );
 define( 'LSET_URL', plugin_dir_url( __FILE__ ) );
-define( 'LSET_DB_VERSION', 2 );
+define( 'LSET_DB_VERSION', 3 );
 define( 'LSET_CPT', 'lset_event' );
 define( 'LSET_VENUE', 'lset_venue' );
 define( 'LSET_CAP_ATTENDEES', 'lset_view_attendees' );
+define( 'LSET_CAP_CHECKIN', 'lset_check_in' );
 
 // lset-github-updater:start
 // Updates from GitHub releases (starts itself), for copies installed from the GitHub release zip.
@@ -49,6 +51,8 @@ require_once LSET_DIR . 'includes/class-lset-frontend.php';
 require_once LSET_DIR . 'includes/class-lset-cart.php';
 require_once LSET_DIR . 'includes/class-lset-orders.php';
 require_once LSET_DIR . 'includes/class-lset-attendees.php';
+require_once LSET_DIR . 'includes/class-lset-qr.php';
+require_once LSET_DIR . 'includes/class-lset-tickets.php';
 
 /**
  * Small entry point. VERSION is read by the release build and the GitHub updater.
@@ -64,6 +68,10 @@ final class Lumaha_Simple_Event_Tickets {
 			'auto_complete'    => 1,
 			'event_slug'       => 'events',
 			'delete_on_remove' => 0,
+			'ticket_emails'    => 1,
+			'ticket_colour'    => '#1d3557',
+			'ticket_logo'      => '',
+			'ticket_note'      => '',
 		);
 		$saved = get_option( 'lset_settings', array() );
 		return wp_parse_args( is_array( $saved ) ? $saved : array(), $defaults );
@@ -82,6 +90,7 @@ final class Lumaha_Simple_Event_Tickets {
 		LSET_Cart::init();
 		LSET_Orders::init();
 		LSET_Attendees::init();
+		LSET_Tickets::init();
 		add_action( 'init', function () {
 			load_plugin_textdomain( 'lumaha-simple-event-tickets', false, dirname( plugin_basename( LSET_PLUGIN_FILE ) ) . '/languages' );
 		}, 1 );

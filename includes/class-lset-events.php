@@ -176,7 +176,7 @@ class LSET_Events {
 			wp_set_object_terms( $new_id, array_map( 'intval', $venues ), LSET_VENUE );
 		}
 
-		foreach ( array( '_lset_bookings', '_lset_closed_msg', '_lset_name_fields', '_lset_attendee_fields', '_lset_booking_fields' ) as $key ) {
+		foreach ( array( '_lset_bookings', '_lset_closed_msg', '_lset_ticket_note', '_lset_name_fields', '_lset_attendee_fields', '_lset_booking_fields' ) as $key ) {
 			$v = get_post_meta( $event_id, $key, true );
 			if ( '' !== $v ) {
 				update_post_meta( $new_id, $key, wp_slash( $v ) );

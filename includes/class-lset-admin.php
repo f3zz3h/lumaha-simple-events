@@ -158,6 +158,10 @@ class LSET_Admin {
 			<label for="lset_closed_msg"><?php esc_html_e( 'Message when bookings are closed or sold out (optional)', 'lumaha-simple-event-tickets' ); ?></label><br>
 			<input type="text" class="widefat" id="lset_closed_msg" name="lset[closed_msg]" value="<?php echo esc_attr( $e['closed_msg'] ); ?>" placeholder="<?php esc_attr_e( 'e.g. Just turn up on the day, no tickets needed.', 'lumaha-simple-event-tickets' ); ?>">
 		</p>
+		<p>
+			<label for="lset_ticket_note"><?php esc_html_e( 'Printed on each ticket (optional)', 'lumaha-simple-event-tickets' ); ?></label><br>
+			<textarea class="widefat" rows="2" id="lset_ticket_note" name="lset[ticket_note]" placeholder="<?php esc_attr_e( 'e.g. Doors open 6:30pm. Bring cash for the bar.', 'lumaha-simple-event-tickets' ); ?>"><?php echo esc_textarea( $e['ticket_note'] ); ?></textarea>
+		</p>
 		<?php
 	}
 
@@ -333,6 +337,7 @@ class LSET_Admin {
 			isset( $in['sale_end'] ) ? self::datetime_local( $in['sale_end'] ) : ''
 		);
 		update_post_meta( $post_id, '_lset_closed_msg', isset( $in['closed_msg'] ) ? sanitize_text_field( $in['closed_msg'] ) : '' );
+		update_post_meta( $post_id, '_lset_ticket_note', isset( $in['ticket_note'] ) ? sanitize_textarea_field( $in['ticket_note'] ) : '' );
 		$names = isset( $in['name_fields'] ) ? sanitize_key( $in['name_fields'] ) : 'required';
 		update_post_meta( $post_id, '_lset_name_fields', in_array( $names, array( 'required', 'optional', 'off' ), true ) ? $names : 'required' );
 
@@ -717,6 +722,25 @@ class LSET_Admin {
 					<tr><th><label for="lset_slug"><?php esc_html_e( 'Event address', 'lumaha-simple-event-tickets' ); ?></label></th><td><code><?php echo esc_html( home_url( '/' ) ); ?></code><input type="text" id="lset_slug" name="event_slug" class="regular-text" value="<?php echo esc_attr( $s['event_slug'] ); ?>"><code>/&lt;event-name&gt;/</code></td></tr>
 					<tr><th><?php esc_html_e( 'When the plugin is deleted', 'lumaha-simple-event-tickets' ); ?></th><td><label><input type="checkbox" name="delete_on_remove" value="1" <?php checked( $s['delete_on_remove'] ); ?>> <?php esc_html_e( 'Delete all events, tickets, bookings and attendee details. Orders are never touched.', 'lumaha-simple-event-tickets' ); ?></label></td></tr>
 				</table>
+
+				<h2 id="lset-tickets"><?php esc_html_e( 'Tickets', 'lumaha-simple-event-tickets' ); ?></h2>
+				<p><?php esc_html_e( 'Each person booked gets their own ticket with a QR code. Scanning it with a phone camera opens the ticket; staff who are logged in can check it in there.', 'lumaha-simple-event-tickets' ); ?></p>
+				<table class="form-table">
+					<tr><th><?php esc_html_e( 'Ticket email', 'lumaha-simple-event-tickets' ); ?></th><td><label><input type="checkbox" name="ticket_emails" value="1" <?php checked( $s['ticket_emails'] ); ?>> <?php esc_html_e( 'Email tickets to the buyer when an order is paid (or free)', 'lumaha-simple-event-tickets' ); ?></label>
+						<p class="description">
+							<?php
+							printf(
+								/* translators: %s: link to the WooCommerce email settings */
+								esc_html__( 'Change the subject, heading and closing text in %s. You can always resend from an order: Order actions → Email event tickets to the customer.', 'lumaha-simple-event-tickets' ),
+								'<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=email&section=lset_email_tickets' ) ) . '">' . esc_html__( 'WooCommerce → Settings → Emails → Event tickets', 'lumaha-simple-event-tickets' ) . '</a>'
+							);
+							?>
+						</p></td></tr>
+					<tr><th><label for="lset_ticket_colour"><?php esc_html_e( 'Ticket colour', 'lumaha-simple-event-tickets' ); ?></label></th><td><input type="color" id="lset_ticket_colour" name="ticket_colour" value="<?php echo esc_attr( LSET_Tickets::accent() ); ?>"></td></tr>
+					<tr><th><label for="lset_ticket_logo"><?php esc_html_e( 'Logo on tickets', 'lumaha-simple-event-tickets' ); ?></label></th><td><input type="url" class="regular-text" id="lset_ticket_logo" name="ticket_logo" value="<?php echo esc_attr( $s['ticket_logo'] ); ?>" placeholder="https://"><p class="description"><?php esc_html_e( 'The address of an image from the Media Library. Leave blank to use the site logo.', 'lumaha-simple-event-tickets' ); ?></p></td></tr>
+					<tr><th><label for="lset_ticket_note_all"><?php esc_html_e( 'Printed on every ticket', 'lumaha-simple-event-tickets' ); ?></label></th><td><textarea class="large-text" rows="3" id="lset_ticket_note_all" name="ticket_note" placeholder="<?php esc_attr_e( 'e.g. Children must be collected by an adult. Questions? events@example.org', 'lumaha-simple-event-tickets' ); ?>"><?php echo esc_textarea( $s['ticket_note'] ); ?></textarea><p class="description"><?php esc_html_e( 'Each event can add its own line too, under Event details.', 'lumaha-simple-event-tickets' ); ?></p></td></tr>
+					<tr><th><?php esc_html_e( 'Door check-in', 'lumaha-simple-event-tickets' ); ?></th><td><a href="<?php echo esc_url( LSET_Tickets::door_url() ); ?>"><?php echo esc_html( LSET_Tickets::door_url() ); ?></a><p class="description"><?php esc_html_e( 'For typing in a code when a QR code won\'t scan. Admins and shop managers can check people in; give others the lset_check_in capability (e.g. with the Members plugin).', 'lumaha-simple-event-tickets' ); ?></p></td></tr>
+				</table>
 				<?php submit_button(); ?>
 			</form>
 
@@ -829,6 +853,10 @@ class LSET_Admin {
 			'auto_complete'    => empty( $_POST['auto_complete'] ) ? 0 : 1,
 			'event_slug'       => $slug ? $slug : 'events',
 			'delete_on_remove' => empty( $_POST['delete_on_remove'] ) ? 0 : 1,
+			'ticket_emails'    => empty( $_POST['ticket_emails'] ) ? 0 : 1,
+			'ticket_colour'    => isset( $_POST['ticket_colour'] ) && sanitize_hex_color( wp_unslash( $_POST['ticket_colour'] ) ) ? sanitize_hex_color( wp_unslash( $_POST['ticket_colour'] ) ) : '#1d3557',
+			'ticket_logo'      => isset( $_POST['ticket_logo'] ) ? esc_url_raw( wp_unslash( $_POST['ticket_logo'] ) ) : '',
+			'ticket_note'      => isset( $_POST['ticket_note'] ) ? sanitize_textarea_field( wp_unslash( $_POST['ticket_note'] ) ) : '',
 		);
 		update_option( 'lset_settings', array_merge( $old, $new ) );
 		if ( $old['event_slug'] !== $new['event_slug'] ) {

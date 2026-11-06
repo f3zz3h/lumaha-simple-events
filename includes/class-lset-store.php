@@ -43,6 +43,7 @@ class LSET_Store {
 			'all_day'     => (bool) get_post_meta( $id, '_lset_all_day', true ),
 			'bookings'    => (bool) get_post_meta( $id, '_lset_bookings', true ),
 			'closed_msg'  => (string) get_post_meta( $id, '_lset_closed_msg', true ),
+			'ticket_note' => (string) get_post_meta( $id, '_lset_ticket_note', true ),
 			'name_fields' => self::name_fields_mode( $id ),
 			// When tickets are on sale, for the whole event.
 			'sale_mode'   => (string) get_post_meta( $id, '_lset_sale_mode', true ),

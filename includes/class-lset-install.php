@@ -26,6 +26,9 @@ class LSET_Install {
 		if ( $from && $from < 2 ) {
 			self::upgrade_2();
 		}
+		if ( $from && $from < 3 ) {
+			self::upgrade_3();
+		}
 		update_option( self::OPTION_DB, LSET_DB_VERSION );
 		if ( class_exists( 'WooCommerce' ) && did_action( 'woocommerce_init' ) ) {
 			self::product_id(); // Otherwise made on first use.
@@ -49,6 +52,9 @@ class LSET_Install {
 			if ( $from && $from < 2 ) {
 				self::upgrade_2();
 			}
+			if ( $from && $from < 3 ) {
+				self::upgrade_3();
+			}
 			update_option( self::OPTION_DB, LSET_DB_VERSION );
 		}
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
@@ -71,6 +77,11 @@ class LSET_Install {
 		}
 	}
 
+	/** Version 3: tickets with QR codes. Give every attendee already booked a ticket code. */
+	private static function upgrade_3() {
+		LSET_Tickets::ensure_codes( '1 = %d', array( 1 ) );
+	}
+
 	public static function cron_schedules( $schedules ) {
 		$schedules['lset_five_minutes'] = array(
 			'interval' => 5 * MINUTE_IN_SECONDS,
@@ -89,8 +100,10 @@ class LSET_Install {
 	public static function add_caps() {
 		foreach ( array( 'administrator', 'shop_manager' ) as $role_name ) {
 			$role = get_role( $role_name );
-			if ( $role && ! $role->has_cap( LSET_CAP_ATTENDEES ) ) {
-				$role->add_cap( LSET_CAP_ATTENDEES );
+			foreach ( array( LSET_CAP_ATTENDEES, LSET_CAP_CHECKIN ) as $cap ) {
+				if ( $role && ! $role->has_cap( $cap ) ) {
+					$role->add_cap( $cap );
+				}
 			}
 		}
 	}
@@ -188,11 +201,13 @@ seq int(11) NOT NULL DEFAULT 1,
 first_name varchar(100) NOT NULL DEFAULT '',
 last_name varchar(100) NOT NULL DEFAULT '',
 fields longtext NULL,
+ticket_code varchar(20) NOT NULL DEFAULT '',
 checked_in_at datetime NULL,
 anonymised_at datetime NULL,
 PRIMARY KEY  (id),
 KEY booking_id (booking_id),
-KEY event_id (event_id)
+KEY event_id (event_id),
+KEY ticket_code (ticket_code)
 ) $c;";
 
 		$sql[] = 'CREATE TABLE ' . self::table( 'holds' ) . " (
