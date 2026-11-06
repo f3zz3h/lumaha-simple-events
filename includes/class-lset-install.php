@@ -20,8 +20,12 @@ class LSET_Install {
 	}
 
 	public static function activate() {
+		$from = (int) get_option( self::OPTION_DB );
 		self::create_tables();
 		self::add_caps();
+		if ( $from && $from < 2 ) {
+			self::upgrade_2();
+		}
 		update_option( self::OPTION_DB, LSET_DB_VERSION );
 		if ( class_exists( 'WooCommerce' ) && did_action( 'woocommerce_init' ) ) {
 			self::product_id(); // Otherwise made on first use.
@@ -38,14 +42,33 @@ class LSET_Install {
 
 	/** Runs on every load: cheap version check, so updates from the zip upgrade the tables too. */
 	public static function maybe_upgrade() {
-		if ( (int) get_option( self::OPTION_DB ) !== LSET_DB_VERSION ) {
+		$from = (int) get_option( self::OPTION_DB );
+		if ( $from !== LSET_DB_VERSION ) {
 			self::create_tables();
 			self::add_caps();
+			if ( $from && $from < 2 ) {
+				self::upgrade_2();
+			}
 			update_option( self::OPTION_DB, LSET_DB_VERSION );
 		}
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
 		add_action( 'init', array( __CLASS__, 'schedule' ) );
 		add_action( self::CRON_HOLDS, array( 'LSET_Capacity', 'clear_expired' ) );
+	}
+
+	/** Version 2: the on-sale window moved from each ticket to the event. */
+	private static function upgrade_2() {
+		$ids = get_posts(
+			array(
+				'post_type'      => LSET_CPT,
+				'post_status'    => 'any',
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+			)
+		);
+		foreach ( $ids as $id ) {
+			LSET_Store::sale_window_from_tickets( $id );
+		}
 	}
 
 	public static function cron_schedules( $schedules ) {

@@ -15,7 +15,8 @@ span.lset-small { display: inline; }
 .lset-ticket.is-deleted { opacity: .35; }
 .lset-ticket.is-dragging { opacity: .5; }
 .lset-sale-date, .lset-sale-days { display: none; margin-top: 4px; }
-.lset-ticket[data-mode=date] .lset-sale-date, .lset-ticket[data-mode=days] .lset-sale-days { display: block; }
+.lset-sale[data-mode=date] .lset-sale-date, .lset-sale[data-mode=days] .lset-sale-days { display: inline-block; }
+.lset-sale { margin: 1em 0; }
 .lset-groups { max-width: 480px; }
 .lset-fields-pick { max-width: 720px; }
 .lset-filter { margin: 1em 0; }
@@ -24,3 +25,4 @@ span.lset-small { display: inline; }
 .lset-refunded td { text-decoration: line-through; color: #8c8f94; }
 .lset-summary { max-width: 900px; margin-bottom: 1em; }
 .lset-summary__group td { background: #f6f7f7; }
+.lset-left-at { white-space: nowrap; }

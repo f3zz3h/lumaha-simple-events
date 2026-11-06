@@ -37,9 +37,9 @@ class LSET_Test_Time extends LSET_Test_Case {
 
 	public function test_sale_start_days_before_is_local_midnight() {
 		$id = $this->event( '2027-04-02 18:00:00' );
+		LSET_Store::save_sale_window( $id, 'days', '', 14, '' );
 		$e  = LSET_Store::event( $id );
-		$t  = LSET_Store::ticket( $this->ticket( $id, array( 'sale_start_mode' => 'days', 'sale_start_days' => 14 ) ) );
-		$this->assertSame( '2027-03-19 00:00:00', LSET_Store::sale_start( $t, $e ) );
+		$this->assertSame( '2027-03-19 00:00:00', LSET_Store::sale_start( null, $e ) );
 	}
 
 	public function test_form_parts_are_normalised() {

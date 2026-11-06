@@ -513,6 +513,7 @@ class LSET_Migrate {
 
 			$this->event_fields( $ep_id, $id );
 			$has_tickets = $this->event_tickets( $ep_id, $id, $start );
+			LSET_Store::sale_window_from_tickets( $id ); // EventPrime sets the window per ticket; LSET per event.
 			$enable      = strtolower( (string) get_post_meta( $ep_id, 'em_enable_booking', true ) );
 			$bookings_on = $has_tickets && ! in_array( $enable, array( 'bookings_off', 'off', '0', 'no', 'external_bookings' ), true );
 			update_post_meta( $id, '_lset_bookings', $bookings_on ? 1 : 0 );

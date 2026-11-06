@@ -202,14 +202,15 @@ class LSET_Events {
 			$t['event_id'] = $new_id;
 			$t['ep_id']    = null;
 			$t['group_id'] = isset( $group_map[ $t['group_id'] ] ) ? $group_map[ $t['group_id'] ] : 0;
-			if ( $t['sale_start'] ) {
-				$t['sale_start'] = LSET_Time::shift( $t['sale_start'], $modifier, $event['tz'] );
-			}
-			if ( $t['sale_end'] ) {
-				$t['sale_end'] = LSET_Time::shift( $t['sale_end'], $modifier, $event['tz'] );
-			}
 			LSET_Store::save_ticket( $t );
 		}
+		LSET_Store::save_sale_window(
+			$new_id,
+			$event['sale_mode'],
+			$event['sale_start'] ? LSET_Time::shift( $event['sale_start'], $modifier, $event['tz'] ) : '',
+			$event['sale_days'],
+			$event['sale_end'] ? LSET_Time::shift( $event['sale_end'], $modifier, $event['tz'] ) : ''
+		);
 		return (int) $new_id;
 	}
 }
