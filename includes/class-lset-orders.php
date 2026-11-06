@@ -284,13 +284,14 @@ class LSET_Orders {
 			$wpdb->insert(
 				LSET_Install::table( 'attendees' ),
 				array(
-					'booking_id' => $booking_id,
-					'event_id'   => $event_id,
-					'ticket_id'  => $ticket_id,
-					'seq'        => $i + 1,
-					'first_name' => isset( $p['first_name'] ) ? (string) $p['first_name'] : '',
-					'last_name'  => isset( $p['last_name'] ) ? (string) $p['last_name'] : '',
-					'fields'     => wp_json_encode( self::labelled( isset( $p['fields'] ) ? (array) $p['fields'] : array(), $labels ) ),
+					'booking_id'  => $booking_id,
+					'event_id'    => $event_id,
+					'ticket_id'   => $ticket_id,
+					'seq'         => $i + 1,
+					'first_name'  => isset( $p['first_name'] ) ? (string) $p['first_name'] : '',
+					'last_name'   => isset( $p['last_name'] ) ? (string) $p['last_name'] : '',
+					'fields'      => wp_json_encode( self::labelled( isset( $p['fields'] ) ? (array) $p['fields'] : array(), $labels ) ),
+					'ticket_code' => LSET_Tickets::new_code(),
 				)
 			);
 		}

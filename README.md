@@ -31,6 +31,11 @@ WordPress and WooCommerce, no build step, no licence server.
 - **Attendees** (Events → Attendees, or the link on each event): sold vs capacity per ticket and group,
   everyone's names and answers, CSV download and a printable register. Needs the `lset_view_attendees`
   capability (admins and shop managers have it; give it to others with the Members plugin).
+- **Tickets with QR codes**: each person booked gets their own ticket, emailed when the order is paid
+  (or free), with a link to a page to show or print them. Scanning a code with a phone camera opens the
+  ticket; logged-in staff see whether it's valid (paid, refunded, already used) and tap **Check in**.
+  Colour, logo and text on the tickets are in Events → Settings → *Tickets*; the email's subject and
+  heading in WooCommerce → Settings → Emails → *Event tickets*.
 - **Caching-safe**: event pages hold no counts or nonces; live availability comes from
   `/wp-json/lset/v1/availability/<event>` (sent with `no-store`).
 - **Photo gallery** (optional, the *Photo gallery* box on each event): pick photos from the media library and
@@ -71,6 +76,15 @@ a photo's link can open it. A password for the gallery can be added later (the `
 
 **Print the register.** Events → Attendees, pick the event, **Printable register** (sorted by surname,
 one table per ticket, with a tick column), or **Download CSV** for a spreadsheet.
+
+**Check people in at the door.** Log in on the phone you'll use (admins and shop managers can check in;
+give volunteers the `lset_check_in` capability with the Members plugin). Scan each ticket's QR code with
+the phone's camera, open the link and tap **Check in**. A second scan of the same ticket shows "Already
+checked in". If a code won't scan, type the code printed under it at `/?lset_t=` (also linked as **Door
+check-in** on the Attendees screen). The Attendees list and CSV show who has checked in.
+
+**Resend someone's tickets.** Open the order, pick **Email event tickets to the customer** in *Order
+actions* and click the arrow. The order screen also links to the customer's tickets page.
 
 ## Moving from EventPrime
 

@@ -46,6 +46,7 @@ foreach ( array( 'administrator', 'shop_manager' ) as $lset_role_name ) {
 	$lset_role = get_role( $lset_role_name );
 	if ( $lset_role ) {
 		$lset_role->remove_cap( 'lset_view_attendees' );
+		$lset_role->remove_cap( 'lset_check_in' );
 	}
 }
 

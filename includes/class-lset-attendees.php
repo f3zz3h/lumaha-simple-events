@@ -270,6 +270,9 @@ class LSET_Attendees {
 			<p>
 				<a class="button button-primary" href="<?php echo esc_url( $action_url( 'lset_export' ) ); ?>"><?php esc_html_e( 'Download CSV', 'lumaha-simple-event-tickets' ); ?></a>
 				<a class="button" target="_blank" href="<?php echo esc_url( $action_url( 'lset_register' ) ); ?>"><?php esc_html_e( 'Printable register', 'lumaha-simple-event-tickets' ); ?></a>
+				<?php if ( current_user_can( LSET_CAP_CHECKIN ) ) : ?>
+					<a class="button" target="_blank" href="<?php echo esc_url( LSET_Tickets::door_url() ); ?>"><?php esc_html_e( 'Door check-in', 'lumaha-simple-event-tickets' ); ?></a>
+				<?php endif; ?>
 				<a class="button-link" href="<?php echo esc_url( get_edit_post_link( $event_id ) ); ?>"><?php esc_html_e( 'Edit event', 'lumaha-simple-event-tickets' ); ?></a>
 			</p>
 
@@ -320,10 +323,11 @@ class LSET_Attendees {
 						<th><?php echo esc_html( $label ); ?></th>
 					<?php endforeach; ?>
 					<th><?php esc_html_e( 'Status', 'lumaha-simple-event-tickets' ); ?></th>
+					<th><?php esc_html_e( 'Checked in', 'lumaha-simple-event-tickets' ); ?></th>
 				</tr></thead>
 				<tbody>
 				<?php if ( ! $rows ) : ?>
-					<tr><td colspan="<?php echo 8 + count( $a_cols ) + count( $b_cols ); ?>"><?php esc_html_e( 'No attendees for this filter.', 'lumaha-simple-event-tickets' ); ?></td></tr>
+					<tr><td colspan="<?php echo 9 + count( $a_cols ) + count( $b_cols ); ?>"><?php esc_html_e( 'No attendees for this filter.', 'lumaha-simple-event-tickets' ); ?></td></tr>
 				<?php endif; ?>
 				<?php foreach ( $rows as $r ) : ?>
 					<tr class="<?php echo $r['refunded'] ? 'lset-refunded' : ''; ?>">
@@ -341,6 +345,7 @@ class LSET_Attendees {
 							<td><?php echo esc_html( self::value( $r['booking_fields'], $fid ) ); ?></td>
 						<?php endforeach; ?>
 						<td><?php echo esc_html( $r['refunded'] ? __( 'refunded', 'lumaha-simple-event-tickets' ) : wc_get_order_status_name( $r['status'] ) ); ?></td>
+						<td><?php echo $r['checked_in_at'] ? esc_html( wp_date( 'j M H:i', strtotime( $r['checked_in_at'] . ' UTC' ) ) ) : ''; ?></td>
 					</tr>
 				<?php endforeach; ?>
 				</tbody>
@@ -382,7 +387,7 @@ class LSET_Attendees {
 			array_values( $a_cols ),
 			array( 'Order', 'Booked by', 'Email', 'Phone' ),
 			array_values( $b_cols ),
-			array( 'Status', 'Booked at' )
+			array( 'Status', 'Booked at', 'Ticket code', 'Checked in' )
 		);
 		foreach ( $rows as $r ) {
 			$t     = isset( $tickets[ $r['ticket_id'] ] ) ? $tickets[ $r['ticket_id'] ] : null;
@@ -401,6 +406,8 @@ class LSET_Attendees {
 			}
 			$cells[] = $r['refunded'] ? 'refunded' : $r['status'];
 			$cells[] = $r['created_at'] ? wp_date( 'Y-m-d H:i', strtotime( $r['created_at'] . ' UTC' ) ) : '';
+			$cells[] = $r['ticket_code'] ? LSET_Tickets::display_code( $r['ticket_code'] ) : '';
+			$cells[] = $r['checked_in_at'] ? wp_date( 'Y-m-d H:i', strtotime( $r['checked_in_at'] . ' UTC' ) ) : '';
 			$out[]   = $cells;
 		}
 		return $out;
