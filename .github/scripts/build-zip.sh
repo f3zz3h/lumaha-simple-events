@@ -41,7 +41,7 @@ rsync -a --exclude-from="$ROOT/.distignore" "$ROOT/" "$STAGE/$SLUG/"
 if command -v wp > /dev/null; then
 	mkdir -p "$STAGE/$SLUG/languages"
 	wp i18n make-pot "$STAGE/$SLUG" "$STAGE/$SLUG/languages/$SLUG.pot" --slug="$SLUG" --domain="$SLUG" \
-		--headers='{"Report-Msgid-Bugs-To":"https://github.com/f3zz3h/lumaha-simple-event-tickets/issues"}' --quiet --allow-root
+		--headers='{"Report-Msgid-Bugs-To":"https://github.com/f3zz3h/lumaha-simple-events/issues"}' --quiet --allow-root
 fi
 
 if command -v zip > /dev/null; then

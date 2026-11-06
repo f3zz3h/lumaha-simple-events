@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class LSET_GitHub_Updater {
 
-	const REPO      = 'f3zz3h/lumaha-simple-event-tickets';
+	const REPO      = 'f3zz3h/lumaha-simple-events';
 	const SLUG      = 'lumaha-simple-event-tickets';
 	const CACHE     = 'lset_github_release';
 	const CACHE_TTL = 12 * HOUR_IN_SECONDS;
