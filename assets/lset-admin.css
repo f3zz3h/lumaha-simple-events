@@ -26,3 +26,10 @@ span.lset-small { display: inline; }
 .lset-summary { max-width: 900px; margin-bottom: 1em; }
 .lset-summary__group td { background: #f6f7f7; }
 .lset-left-at { white-space: nowrap; }
+.lset-gallery-admin { display: flex; flex-wrap: wrap; gap: 8px; margin: 1em 0; }
+.lset-gallery-admin:empty { margin: 0; }
+.lset-gallery-admin li { position: relative; width: 96px; height: 96px; margin: 0; cursor: move; }
+.lset-gallery-admin img { width: 96px; height: 96px; object-fit: cover; display: block; border-radius: 3px; }
+.lset-gallery-admin .ui-sortable-placeholder { border: 2px dashed #c3c4c7; visibility: visible !important; }
+.lset-gallery-remove { position: absolute; top: 2px; right: 2px; width: 22px; height: 22px; padding: 0; border: 0; border-radius: 50%; background: rgba(0,0,0,.65); color: #fff; cursor: pointer; line-height: 22px; font-size: 12px; }
+.lset-gallery-remove:hover, .lset-gallery-remove:focus { background: #d63638; }

@@ -332,7 +332,13 @@ class LSET_Frontend {
 		$html    = '<div class="lset-events lset-events--' . esc_attr( $layout ) . ( 'grid' === $layout ? ' lset-events--cols-' . $columns : '' ) . '">';
 		foreach ( $q->posts as $post ) {
 			$e     = LSET_Store::event( $post );
-			$label = $e['bookings'] && ! self::is_past( $e ) ? __( 'Book', 'lumaha-simple-event-tickets' ) : __( 'More info', 'lumaha-simple-event-tickets' );
+			$href  = $e['url'];
+			if ( LSET_Gallery::is_visible( $e ) ) {
+				$label = __( 'See photos', 'lumaha-simple-event-tickets' );
+				$href .= '#lset-photos';
+			} else {
+				$label = $e['bookings'] && ! self::is_past( $e ) ? __( 'Book', 'lumaha-simple-event-tickets' ) : __( 'More info', 'lumaha-simple-event-tickets' );
+			}
 			if ( 'compact' === $layout ) {
 				$html .= '<article class="lset-row"><span class="lset-row__when">' . esc_html( self::when( $e ) ) . '</span> <a class="lset-row__title" href="' . esc_url( $e['url'] ) . '">' . esc_html( $e['title'] ) . '</a>';
 				if ( $on( 'venue' ) && $e['venue'] ) {
@@ -362,7 +368,7 @@ class LSET_Frontend {
 					$html .= '<span class="lset-card__price">' . esc_html( $price ) . '</span> ';
 				}
 				if ( $on( 'button' ) ) {
-					$html .= '<a class="lset-button" href="' . esc_url( $e['url'] ) . '">' . esc_html( $label ) . '</a>';
+					$html .= '<a class="lset-button" href="' . esc_url( $href ) . '">' . esc_html( $label ) . '</a>';
 				}
 				$html .= '</p>';
 			}
@@ -384,7 +390,7 @@ class LSET_Frontend {
 		if ( ! $e ) {
 			return $content;
 		}
-		return self::details( $e ) . $content . self::booking_box( $e );
+		return self::details( $e ) . $content . self::booking_box( $e ) . LSET_Gallery::for_event_page( $e );
 	}
 
 	public static function shortcode_event( $atts ) {
