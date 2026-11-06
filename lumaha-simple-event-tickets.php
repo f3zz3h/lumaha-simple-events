@@ -3,7 +3,7 @@
  * Plugin Name:       Lumaha Simple Event Tickets
  * Plugin URI:        https://github.com/f3zz3h/lumaha-simple-events
  * Description:       School events with tickets sold through the normal WooCommerce checkout. Attendee details per ticket, capacity with short holds, and an attendee list, CSV and printable register for the night.
- * Version:           0.2.0
+ * Version:           0.2.1
  * Author:            Lumaha
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -24,7 +24,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'LSET_VERSION', '0.2.0' );
+define( 'LSET_VERSION', '0.2.1' );
 define( 'LSET_PLUGIN_FILE', __FILE__ );
 define( 'LSET_DIR', __DIR__ . '/' );
 define( 'LSET_URL', plugin_dir_url( __FILE__ ) );
@@ -60,7 +60,7 @@ require_once LSET_DIR . 'includes/class-lset-tickets.php';
  */
 final class Lumaha_Simple_Event_Tickets {
 
-	const VERSION = '0.2.0';
+	const VERSION = '0.2.1';
 
 	/** Plugin settings with their defaults. */
 	public static function settings() {
