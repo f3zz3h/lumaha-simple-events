@@ -1,4 +1,4 @@
-/* Lumaha Simple Event Tickets: the event screen (on-sale options; ticket rows: add, remove, drag to reorder). */
+/* Lumaha Simple Event Tickets: the event screen (on-sale options; ticket groups; ticket rows: add, remove, drag to reorder). */
 ( function () {
 	'use strict';
 	// Event-level "Tickets on sale": show the date or days input for the chosen option.
@@ -10,6 +10,72 @@
 			} );
 		}
 	} );
+
+	// Ticket groups: add, rename and remove rows, and keep every ticket's group list in step.
+	var gtable = document.querySelector( '.lset-groups tbody' );
+	var gtpl = document.getElementById( 'lset-group-template' );
+	var gcount = 0;
+	function pickers() {
+		var list = Array.prototype.slice.call( document.querySelectorAll( '.lset-tickets .lset-group-pick' ) );
+		var tt = document.getElementById( 'lset-ticket-template' );
+		var inTpl = tt && tt.content ? tt.content.querySelector( '.lset-group-pick' ) : null;
+		if ( inTpl ) {
+			list.push( inTpl );
+		}
+		return list;
+	}
+	function optionFor( sel, key ) {
+		return Array.prototype.slice.call( sel.options ).filter( function ( o ) {
+			return o.value === key;
+		} )[ 0 ];
+	}
+	function syncGroup( row ) {
+		var key = row.getAttribute( 'data-key' );
+		var name = row.querySelector( '.lset-group-name' ).value.trim();
+		var gone = row.querySelector( '.lset-delete-flag' ).value === '1' || name === '';
+		pickers().forEach( function ( sel ) {
+			var o = optionFor( sel, key );
+			if ( ! o ) {
+				o = document.createElement( 'option' );
+				o.value = key;
+				sel.appendChild( o );
+			}
+			o.textContent = name;
+			o.disabled = gone;
+			o.hidden = gone;
+			if ( gone && sel.value === key ) {
+				sel.value = '';
+			}
+		} );
+	}
+	if ( gtable && gtpl ) {
+		document.querySelector( '.lset-add-group' ).addEventListener( 'click', function () {
+			var key = 'n' + ( ++gcount );
+			var holder = document.createElement( 'tbody' );
+			holder.innerHTML = gtpl.innerHTML.replace( /__g__/g, key );
+			var row = holder.firstElementChild;
+			gtable.appendChild( row );
+			syncGroup( row );
+			row.querySelector( 'input[type=text]' ).focus();
+		} );
+		gtable.addEventListener( 'input', function ( ev ) {
+			if ( ev.target.classList.contains( 'lset-group-name' ) ) {
+				syncGroup( ev.target.closest( '.lset-group' ) );
+			}
+		} );
+		gtable.addEventListener( 'click', function ( ev ) {
+			if ( ! ev.target.classList.contains( 'lset-remove' ) ) {
+				return;
+			}
+			var row = ev.target.closest( '.lset-group' );
+			var flag = row.querySelector( '.lset-delete-flag' );
+			var on = flag.value !== '1';
+			flag.value = on ? '1' : '0';
+			row.classList.toggle( 'is-deleted', on );
+			ev.target.textContent = on ? '↺' : '✕';
+			syncGroup( row );
+		} );
+	}
 
 	var table = document.querySelector( '.lset-tickets tbody' );
 	var tpl = document.getElementById( 'lset-ticket-template' );

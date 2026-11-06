@@ -63,6 +63,7 @@ final class Lumaha_Simple_Event_Tickets {
 			'hold_minutes'     => 15,
 			'auto_complete'    => 1,
 			'event_slug'       => 'events',
+			'event_sidebar'    => 0, // Event pages full width by default.
 			'delete_on_remove' => 0,
 		);
 		$saved = get_option( 'lset_settings', array() );

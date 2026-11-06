@@ -1,8 +1,22 @@
 /* Lumaha Simple Event Tickets: plain, themable, mobile first.
  * Colours come from the theme (currentColor / inherit); override .lset-* classes to restyle. */
 .lset-events { display: grid; gap: 1.25rem; grid-template-columns: 1fr; margin: 0 0 1.5rem; }
-@media (min-width: 640px) { .lset-events { grid-template-columns: repeat(2, 1fr); } }
-@media (min-width: 1024px) { .lset-events { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 640px) { .lset-events--cols-2, .lset-events--cols-3, .lset-events--cols-4 { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .lset-events--cols-3 { grid-template-columns: repeat(3, 1fr); } .lset-events--cols-4 { grid-template-columns: repeat(4, 1fr); } }
+/* layout="list": one wide row per event, image at the side. */
+@media (min-width: 640px) {
+	.lset-events--list .lset-card { flex-direction: row; }
+	.lset-events--list .lset-card__media { flex: 0 0 34%; aspect-ratio: auto; min-height: 10rem; }
+}
+/* layout="compact": date and title, one line each. */
+.lset-events--compact { gap: 0; }
+.lset-row { padding: .6rem 0; border-bottom: 1px solid rgba(0,0,0,.12); display: flex; flex-wrap: wrap; gap: .25rem 1rem; align-items: baseline; }
+.lset-row__when { min-width: 14em; opacity: .8; }
+.lset-row__title { font-weight: 600; text-decoration: none; }
+.lset-row__venue { opacity: .8; }
+/* Event pages without a sidebar, for themes that only hide it with CSS. */
+.lset-full-width #secondary, .lset-full-width .widget-area.sidebar, .lset-full-width aside.sidebar { display: none; }
+.lset-full-width #primary, .lset-full-width .content-area { width: 100%; max-width: 100%; float: none; }
 .lset-card { display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,.12); border-radius: 8px; overflow: hidden; background: inherit; }
 .lset-card__media { display: block; aspect-ratio: 16 / 9; overflow: hidden; }
 .lset-card__img { width: 100%; height: 100%; object-fit: cover; display: block; }

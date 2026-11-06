@@ -97,4 +97,60 @@ class LSET_Test_Events extends LSET_Test_Case {
 		$this->assertStringContainsString( 'Coming soon', $next );
 		$this->assertStringNotContainsString( 'Old one', $next );
 	}
+
+	public function test_list_layouts_and_filters() {
+		$a = $this->event( '2030-01-10 18:00:00', '2030-01-10 20:00:00' );
+		$b = $this->event( '2031-02-10 18:00:00', '2031-02-10 20:00:00' );
+		wp_update_post( array( 'ID' => $a, 'post_title' => 'Disco 2030', 'post_excerpt' => 'Dance!' ) );
+		wp_update_post( array( 'ID' => $b, 'post_title' => 'Fair 2031' ) );
+		$this->ticket( $a, array( 'price' => 4 ) );
+		$hall = wp_insert_term( 'School Hall', LSET_VENUE );
+		wp_set_object_terms( $b, array( (int) $hall['term_id'] ), LSET_VENUE );
+
+		$compact = do_shortcode( '[lset_events layout="compact"]' );
+		$this->assertStringContainsString( 'lset-events--compact', $compact );
+		$this->assertStringContainsString( 'lset-row', $compact );
+		$this->assertStringNotContainsString( 'lset-button', $compact );
+
+		$bare = do_shortcode( '[lset_events price="0" excerpt="0" button="0" columns="2"]' );
+		$this->assertStringContainsString( 'lset-events--cols-2', $bare );
+		$this->assertStringNotContainsString( 'Dance!', $bare );
+		$this->assertStringNotContainsString( 'lset-card__price', $bare );
+		$this->assertStringNotContainsString( 'lset-button', $bare );
+
+		$this->assertStringContainsString( 'Fair 2031', do_shortcode( '[lset_events where="School Hall"]' ) );
+		$this->assertStringNotContainsString( 'Disco 2030', do_shortcode( '[lset_events where="school-hall"]' ) );
+		$this->assertStringNotContainsString( 'Fair 2031', do_shortcode( '[lset_events year="2030"]' ) );
+		$this->assertStringContainsString( 'Disco 2030', do_shortcode( '[lset_events year="2030"]' ) );
+	}
+
+	public function test_admin_save_creates_groups_and_assigns_tickets() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		get_role( 'administrator' )->add_cap( 'manage_woocommerce' );
+		$e     = $this->event();
+		$old   = LSET_Store::save_group( array( 'event_id' => $e, 'name' => 'Old', 'capacity' => 5 ) );
+		$t     = $this->ticket( $e, array( 'name' => 'Kept', 'group_id' => $old ) );
+		$_POST = array(
+			'lset_nonce'   => wp_create_nonce( 'lset_save_event' ),
+			'lset'         => array( 'start_date' => '2030-07-03', 'start_time' => '12:00', 'bookings' => 1 ),
+			'lset_groups'  => array(
+				(string) $old => array( 'name' => 'Old', 'capacity' => '5', 'delete' => '1' ),
+				'n1'          => array( 'name' => 'Volunteering', 'capacity' => '6', 'delete' => '0' ),
+			),
+			'lset_tickets' => array(
+				't' . $t => array( 'id' => $t, 'name' => 'Kept', 'price' => '1', 'group' => 'n1' ),
+				'n1'     => array( 'id' => 0, 'name' => 'Door', 'price' => '0', 'group' => '' ),
+			),
+		);
+		LSET_Admin::save_event( $e, get_post( $e ) );
+		$_POST = array();
+
+		$groups = array_values( LSET_Store::groups( $e ) );
+		$this->assertCount( 1, $groups );
+		$this->assertSame( 'Volunteering', $groups[0]['name'] );
+		$this->assertSame( 6, $groups[0]['capacity'] );
+		$tickets = array_column( LSET_Store::tickets( $e ), null, 'name' );
+		$this->assertSame( $groups[0]['id'], $tickets['Kept']['group_id'] );
+		$this->assertSame( 0, $tickets['Door']['group_id'] );
+	}
 }

@@ -21,6 +21,57 @@ class LSET_Frontend {
 		add_filter( 'the_content', array( __CLASS__, 'single_content' ), 20 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'register_assets' ) );
 		add_action( 'rest_api_init', array( __CLASS__, 'rest_routes' ) );
+		add_action( 'template_redirect', array( __CLASS__, 'maybe_full_width' ) );
+	}
+
+	/**
+	 * Event pages without the theme's sidebar (unless the setting turns it back on). Themes do
+	 * this differently, so: tell the common ones directly, and empty sidebar widget areas (not
+	 * headers or footers) for this page so the rest skip their sidebar.
+	 */
+	public static function maybe_full_width() {
+		if ( ! is_singular( LSET_CPT ) || Lumaha_Simple_Event_Tickets::setting( 'event_sidebar' ) ) {
+			return;
+		}
+		$none = function () {
+			return 'no-sidebar';
+		};
+		add_filter( 'astra_page_layout', $none );
+		add_filter( 'generate_sidebar_layout', $none );
+		add_filter(
+			'ocean_post_layout_class',
+			function () {
+				return 'full-width';
+			}
+		);
+		add_filter(
+			'kadence_post_layout',
+			function ( $layout ) {
+				$layout = is_array( $layout ) ? $layout : array();
+				$layout['layout'] = 'normal';
+				$layout['sidebar'] = 'none';
+				return $layout;
+			}
+		);
+		add_filter( 'sidebars_widgets', array( __CLASS__, 'hide_sidebars' ) );
+		add_filter(
+			'body_class',
+			function ( $classes ) {
+				$classes[] = 'lset-full-width';
+				$classes[] = 'no-sidebar';
+				return array_diff( $classes, array( 'has-sidebar', 'right-sidebar', 'left-sidebar' ) );
+			}
+		);
+	}
+
+	/** @param array $areas Widget area id => widget ids. */
+	public static function hide_sidebars( $areas ) {
+		foreach ( (array) $areas as $id => $widgets ) {
+			if ( 'wp_inactive_widgets' !== $id && ! preg_match( '/footer|header|menu|nav|top|bottom/i', (string) $id ) ) {
+				$areas[ $id ] = array();
+			}
+		}
+		return $areas;
 	}
 
 	public static function register_assets() {
@@ -119,6 +170,15 @@ class LSET_Frontend {
 				'order'     => '', // Default: soonest first; newest first for past events.
 				'limit'     => '-1',
 				'show_past' => '0', // Same as past="1".
+				'layout'    => 'grid', // grid (cards), list (wide rows with the image at the side), compact (date and title only).
+				'columns'   => '3', // Grid: most cards per row on a wide screen, 1 to 4.
+				'image'     => '1',
+				'excerpt'   => '1',
+				'venue'     => '1',
+				'price'     => '1',
+				'button'    => '1',
+				'where'     => '', // Only events at this venue (its name or slug).
+				'year'      => '', // Only events starting in this year, e.g. 2025.
 			),
 			$atts,
 			'lset_events'
@@ -155,35 +215,74 @@ class LSET_Frontend {
 				),
 			);
 		}
+		if ( '' !== trim( (string) $atts['where'] ) ) {
+			$term = get_term_by( 'slug', sanitize_title( $atts['where'] ), LSET_VENUE );
+			$term = $term ? $term : get_term_by( 'name', trim( (string) $atts['where'] ), LSET_VENUE );
+			$args['tax_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_query_tax_query
+				array(
+					'taxonomy' => LSET_VENUE,
+					'field'    => 'term_id',
+					'terms'    => $term ? array( (int) $term->term_id ) : array( 0 ),
+				),
+			);
+		}
+		$year = (int) $atts['year'];
+		if ( $year > 1900 ) {
+			$args['meta_query']   = isset( $args['meta_query'] ) ? $args['meta_query'] : array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_query_meta_query
+			$args['meta_query'][] = array(
+				'key'     => '_lset_start',
+				'value'   => array( $year . '-01-01 00:00:00', $year . '-12-31 23:59:59' ),
+				'compare' => 'BETWEEN',
+				'type'    => 'DATETIME',
+			);
+		}
 		$q = new WP_Query( $args );
 		if ( ! $q->have_posts() ) {
 			$none = $past && ! $upcoming ? __( 'No past events yet.', 'lumaha-simple-event-tickets' ) : __( 'No events coming up just now. Please check back soon.', 'lumaha-simple-event-tickets' );
 			return '<div class="lset-events lset-events--empty"><p>' . esc_html( $none ) . '</p></div>';
 		}
-		$html = '<div class="lset-events">';
+		$on      = function ( $k ) use ( $atts ) {
+			return ! in_array( strtolower( (string) $atts[ $k ] ), array( '0', 'no', 'false', 'off' ), true );
+		};
+		$layout  = in_array( $atts['layout'], array( 'grid', 'list', 'compact' ), true ) ? $atts['layout'] : 'grid';
+		$columns = min( 4, max( 1, (int) $atts['columns'] ) );
+		$html    = '<div class="lset-events lset-events--' . esc_attr( $layout ) . ( 'grid' === $layout ? ' lset-events--cols-' . $columns : '' ) . '">';
 		foreach ( $q->posts as $post ) {
 			$e     = LSET_Store::event( $post );
-			$price = $e['bookings'] ? self::from_price( $e['id'] ) : '';
-			$img   = get_the_post_thumbnail( $post, 'medium_large', array( 'class' => 'lset-card__img', 'loading' => 'lazy' ) );
+			$label = $e['bookings'] && ! self::is_past( $e ) ? __( 'Book', 'lumaha-simple-event-tickets' ) : __( 'More info', 'lumaha-simple-event-tickets' );
+			if ( 'compact' === $layout ) {
+				$html .= '<article class="lset-row"><span class="lset-row__when">' . esc_html( self::when( $e ) ) . '</span> <a class="lset-row__title" href="' . esc_url( $e['url'] ) . '">' . esc_html( $e['title'] ) . '</a>';
+				if ( $on( 'venue' ) && $e['venue'] ) {
+					$html .= ' <span class="lset-row__venue">' . esc_html( $e['venue']['name'] ) . '</span>';
+				}
+				$html .= '</article>';
+				continue;
+			}
+			$price = $on( 'price' ) && $e['bookings'] ? self::from_price( $e['id'] ) : '';
+			$img   = $on( 'image' ) ? get_the_post_thumbnail( $post, 'medium_large', array( 'class' => 'lset-card__img', 'loading' => 'lazy' ) ) : '';
 			$html .= '<article class="lset-card">';
 			if ( $img ) {
-				$html .= '<a class="lset-card__media" href="' . esc_url( $e['url'] ) . '">' . $img . '</a>';
+				$html .= '<a class="lset-card__media" href="' . esc_url( $e['url'] ) . '" tabindex="-1" aria-hidden="true">' . $img . '</a>';
 			}
 			$html .= '<div class="lset-card__body">';
 			$html .= '<h3 class="lset-card__title"><a href="' . esc_url( $e['url'] ) . '">' . esc_html( $e['title'] ) . '</a></h3>';
 			$html .= '<p class="lset-card__when">' . esc_html( self::when( $e ) ) . '</p>';
-			if ( $e['venue'] ) {
+			if ( $on( 'venue' ) && $e['venue'] ) {
 				$html .= '<p class="lset-card__venue">' . esc_html( $e['venue']['name'] ) . '</p>';
 			}
-			if ( has_excerpt( $post ) ) {
+			if ( $on( 'excerpt' ) && has_excerpt( $post ) ) {
 				$html .= '<p class="lset-card__excerpt">' . esc_html( get_the_excerpt( $post ) ) . '</p>';
 			}
-			$html .= '<p class="lset-card__foot">';
-			if ( $price ) {
-				$html .= '<span class="lset-card__price">' . esc_html( $price ) . '</span> ';
+			if ( $price || $on( 'button' ) ) {
+				$html .= '<p class="lset-card__foot">';
+				if ( $price ) {
+					$html .= '<span class="lset-card__price">' . esc_html( $price ) . '</span> ';
+				}
+				if ( $on( 'button' ) ) {
+					$html .= '<a class="lset-button" href="' . esc_url( $e['url'] ) . '">' . esc_html( $label ) . '</a>';
+				}
+				$html .= '</p>';
 			}
-			$label = $e['bookings'] && ! self::is_past( $e ) ? __( 'Book', 'lumaha-simple-event-tickets' ) : __( 'More info', 'lumaha-simple-event-tickets' );
-			$html .= '<a class="lset-button" href="' . esc_url( $e['url'] ) . '">' . esc_html( $label ) . '</a></p>';
 			$html .= '</div></article>';
 		}
 		$html .= '</div>';
