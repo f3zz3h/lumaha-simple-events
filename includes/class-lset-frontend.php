@@ -100,7 +100,7 @@ class LSET_Frontend {
 	 * headers or footers) for this page so the rest skip their sidebar.
 	 */
 	public static function maybe_full_width() {
-		if ( ! is_singular( LSET_CPT ) || Lumaha_Simple_Event_Tickets::setting( 'event_sidebar' ) ) {
+		if ( ! is_singular( LSET_CPT ) || LSET_Plugin::setting( 'event_sidebar' ) ) {
 			return;
 		}
 		$none = function () {
@@ -164,6 +164,7 @@ class LSET_Frontend {
 			'lset',
 			'lsetText',
 			array(
+				/* translators: %1$d: ticket number on the form (1, 2, 3…), %2$s: ticket name. */
 				'attendee'     => __( 'Ticket %1$d: %2$s', 'lumaha-simple-event-tickets' ),
 				'firstName'    => __( 'First name', 'lumaha-simple-event-tickets' ),
 				'lastName'     => __( 'Last name', 'lumaha-simple-event-tickets' ),
@@ -171,6 +172,7 @@ class LSET_Frontend {
 				'choose'       => __( 'Choose…', 'lumaha-simple-event-tickets' ),
 				'yes'          => __( 'Yes', 'lumaha-simple-event-tickets' ),
 				'soldOut'      => __( 'Sold out', 'lumaha-simple-event-tickets' ),
+				/* translators: %d: number of tickets left. */
 				'left'         => __( '%d left', 'lumaha-simple-event-tickets' ),
 				'ended'        => __( 'Sales have ended', 'lumaha-simple-event-tickets' ),
 				'offline'      => __( 'We couldn\'t check live availability. Please refresh the page.', 'lumaha-simple-event-tickets' ),
@@ -569,7 +571,7 @@ class LSET_Frontend {
 			array(
 				'methods'             => 'GET',
 				'callback'            => array( __CLASS__, 'rest_availability' ),
-				'permission_callback' => '__return_true', // Public, read-only: the same facts the event page shows.
+				'permission_callback' => array( __CLASS__, 'can_read_availability' ),
 				'args'                => array(
 					'id' => array(
 						'validate_callback' => function ( $v ) {
@@ -579,6 +581,17 @@ class LSET_Frontend {
 				),
 			)
 		);
+	}
+
+	/**
+	 * Anyone may read availability: it's the same facts the public event page shows (tickets left,
+	 * on sale or not), for published events only. Sites can close it with the lset_rest_can_read filter.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return bool
+	 */
+	public static function can_read_availability( WP_REST_Request $request ) {
+		return (bool) apply_filters( 'lset_rest_can_read', true, $request );
 	}
 
 	public static function rest_availability( WP_REST_Request $request ) {

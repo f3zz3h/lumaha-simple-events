@@ -24,7 +24,7 @@ class LSET_Capacity {
 	const HELD = array( 'pending', 'checkout-draft' );
 
 	public static function hold_seconds() {
-		return max( 1, (int) Lumaha_Simple_Event_Tickets::setting( 'hold_minutes' ) ) * MINUTE_IN_SECONDS;
+		return max( 1, (int) LSET_Plugin::setting( 'hold_minutes' ) ) * MINUTE_IN_SECONDS;
 	}
 
 	/**

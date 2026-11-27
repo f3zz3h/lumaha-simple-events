@@ -3,6 +3,8 @@ run-name: ${{ github.ref_type == 'tag' && format('Release {0}', github.ref_name)
 
 # On a version tag (v0.1.0), build the plugin zip and publish a GitHub release with it.
 # Sites with the plugin then see the update in Dashboard → Updates (from the GitHub updater).
+# The release also gets the WordPress.org build (-wporg.zip: no GitHub updater), for submitting
+# to and later deploying on WordPress.org.
 # On pull requests, just build the zip so it can be downloaded and tried.
 on:
   push:
@@ -44,6 +46,23 @@ jobs:
           retention-days: ${{ github.ref_type == 'tag' && 90 || 7 }}
           if-no-files-found: error
 
+      - name: Build WordPress.org zip
+        id: wporg
+        run: |
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            bash .github/scripts/build-zip.sh --wporg "${GITHUB_REF_NAME#v}"
+          else
+            bash .github/scripts/build-zip.sh --wporg
+          fi
+
+      - name: Upload WordPress.org zip
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.wporg.outputs.name }}
+          path: ${{ steps.wporg.outputs.zip }}
+          retention-days: ${{ github.ref_type == 'tag' && 90 || 7 }}
+          if-no-files-found: error
+
       - name: Upload EventPrime migrator zip
         uses: actions/upload-artifact@v7
         with:
@@ -74,7 +93,11 @@ jobs:
         id: build
         run: bash .github/scripts/build-zip.sh "${GITHUB_REF_NAME#v}"
 
-      - name: Create release with the zip
-        run: gh release create "$GITHUB_REF_NAME" "${{ steps.build.outputs.zip }}" "${{ steps.build.outputs.addon_zip }}" --title "Lumaha Simple Event Tickets ${{ steps.build.outputs.version }}" --generate-notes --verify-tag
+      - name: Build WordPress.org zip
+        id: wporg
+        run: bash .github/scripts/build-zip.sh --wporg "${GITHUB_REF_NAME#v}"
+
+      - name: Create release with the zips
+        run: gh release create "$GITHUB_REF_NAME" "${{ steps.build.outputs.zip }}" "${{ steps.wporg.outputs.zip }}" "${{ steps.build.outputs.addon_zip }}" --title "Lumaha Simple Event Tickets ${{ steps.build.outputs.version }}" --generate-notes --verify-tag
         env:
           GH_TOKEN: ${{ github.token }}

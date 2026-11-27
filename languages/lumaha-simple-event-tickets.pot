@@ -1,0 +1,1517 @@
+# Copyright (C) 2026 Lumaha
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Lumaha Simple Event Tickets 0.3.0\n"
+"Report-Msgid-Bugs-To: https://github.com/f3zz3h/lumaha-simple-events/issues\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-11-27T00:27:29+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: lumaha-simple-event-tickets\n"
+
+#. Plugin Name of the plugin
+#: lumaha-simple-event-tickets.php:3
+#: includes/class-lset-admin.php:46
+msgid "Lumaha Simple Event Tickets"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: lumaha-simple-event-tickets.php:4
+msgid "https://github.com/f3zz3h/lumaha-simple-events"
+msgstr ""
+
+#. Description of the plugin
+#: lumaha-simple-event-tickets.php:5
+msgid "School events with tickets sold through the normal WooCommerce checkout. Attendee details per ticket, capacity with short holds, and an attendee list, CSV and printable register for the night."
+msgstr ""
+
+#. Author of the plugin
+#: lumaha-simple-event-tickets.php:7
+msgid "Lumaha"
+msgstr ""
+
+#: includes/class-lset-admin.php:44
+msgid "When you book tickets for an event, we keep the names on each ticket and any answers you give at checkout (for example a child's class or dietary needs) with your order, so we can make the attendee list and register for the event and check tickets at the door."
+msgstr ""
+
+#: includes/class-lset-admin.php:45
+msgid "Each ticket has a code, shown as a QR code, that lets anyone holding it see that ticket. Event staff can see who has checked in. These details are not sent to anyone else."
+msgstr ""
+
+#: includes/class-lset-admin.php:64
+#: includes/class-lset-admin.php:102
+#: includes/class-lset-admin.php:647
+msgid "Checkout fields"
+msgstr ""
+
+#: includes/class-lset-admin.php:65
+#: includes/class-lset-admin.php:730
+msgid "Event settings"
+msgstr ""
+
+#: includes/class-lset-admin.php:65
+msgid "Settings"
+msgstr ""
+
+#: includes/class-lset-admin.php:66
+msgid "Duplicate event"
+msgstr ""
+
+#: includes/class-lset-admin.php:74
+msgid "Events aren't listed on your site yet."
+msgstr ""
+
+#: includes/class-lset-admin.php:76
+msgid "Set up the Events and Past events pages"
+msgstr ""
+
+#: includes/class-lset-admin.php:83
+msgid "Field saved."
+msgstr ""
+
+#: includes/class-lset-admin.php:84
+msgid "Field deleted."
+msgstr ""
+
+#: includes/class-lset-admin.php:85
+msgid "Settings saved."
+msgstr ""
+
+#: includes/class-lset-admin.php:86
+msgid "Page created and published. Add it to your menu under Appearance → Menus (or in Elementor) so people can find it."
+msgstr ""
+
+#: includes/class-lset-admin.php:87
+msgid "Event copied as a draft. Check the dates and tickets, then publish it."
+msgstr ""
+
+#: includes/class-lset-admin.php:100
+msgid "Event details"
+msgstr ""
+
+#: includes/class-lset-admin.php:101
+#: includes/class-lset-admin.php:200
+#: includes/class-lset-admin.php:742
+#: includes/class-lset-frontend.php:482
+#: includes/class-lset-orders.php:66
+msgid "Tickets"
+msgstr ""
+
+#: includes/class-lset-admin.php:119
+#: includes/class-lset-admin.php:500
+msgid "Starts"
+msgstr ""
+
+#: includes/class-lset-admin.php:124
+msgid "Ends"
+msgstr ""
+
+#: includes/class-lset-admin.php:129
+msgid "All day (hide times)"
+msgstr ""
+
+#: includes/class-lset-admin.php:132
+#: includes/class-lset-cart.php:349
+#: includes/class-lset-events.php:74
+#: includes/class-lset-orders.php:90
+msgid "Venue"
+msgstr ""
+
+#: includes/class-lset-admin.php:134
+msgid "— None —"
+msgstr ""
+
+#: includes/class-lset-admin.php:139
+msgid "Manage venues"
+msgstr ""
+
+#. translators: %s: timezone name, e.g. Europe/London
+#: includes/class-lset-admin.php:145
+#, php-format
+msgid "Times are in the site timezone (%s), exactly as you type them."
+msgstr ""
+
+#: includes/class-lset-admin.php:150
+msgid "Take bookings for this event"
+msgstr ""
+
+#: includes/class-lset-admin.php:151
+msgid "Untick for information-only events (fairs, AGM)."
+msgstr ""
+
+#: includes/class-lset-admin.php:154
+msgid "Tickets on sale"
+msgstr ""
+
+#: includes/class-lset-admin.php:156
+msgid "Now"
+msgstr ""
+
+#: includes/class-lset-admin.php:157
+msgid "From a date"
+msgstr ""
+
+#: includes/class-lset-admin.php:158
+msgid "A number of days before the event"
+msgstr ""
+
+#: includes/class-lset-admin.php:160
+msgid "On sale from"
+msgstr ""
+
+#: includes/class-lset-admin.php:161
+msgid "Days before the event"
+msgstr ""
+
+#: includes/class-lset-admin.php:161
+msgid "days before (from midnight)"
+msgstr ""
+
+#: includes/class-lset-admin.php:163
+msgid "Sales close"
+msgstr ""
+
+#: includes/class-lset-admin.php:165
+msgid "Leave blank to close when the event starts. Applies to every ticket."
+msgstr ""
+
+#: includes/class-lset-admin.php:169
+msgid "Message when bookings are closed or sold out (optional)"
+msgstr ""
+
+#: includes/class-lset-admin.php:170
+msgid "e.g. Just turn up on the day, no tickets needed."
+msgstr ""
+
+#: includes/class-lset-admin.php:173
+msgid "Printed on each ticket (optional)"
+msgstr ""
+
+#: includes/class-lset-admin.php:174
+msgid "e.g. Doors open 6:30pm. Bring cash for the bar."
+msgstr ""
+
+#: includes/class-lset-admin.php:185
+msgid "Ticket groups"
+msgstr ""
+
+#: includes/class-lset-admin.php:186
+msgid "Optional. A group lets several tickets share one limit, e.g. \"Volunteering\" capped at 6 across all volunteer slots. Add groups here, then pick one on each ticket below. Tickets with \"No group\" just use their own capacity. Buyers don't see groups."
+msgstr ""
+
+#: includes/class-lset-admin.php:188
+#: includes/class-lset-admin.php:209
+#: includes/class-lset-attendees.php:282
+msgid "Group"
+msgstr ""
+
+#: includes/class-lset-admin.php:188
+msgid "Shared capacity"
+msgstr ""
+
+#: includes/class-lset-admin.php:198
+msgid "Add group"
+msgstr ""
+
+#: includes/class-lset-admin.php:201
+msgid "Leave capacity blank for no limit. The box under it is optional: e.g. 5 shows buyers \"Only 5 left\" once 5 or fewer remain. Price 0 means free (it still goes through the checkout as a £0 order). When tickets go on sale is set once, in Event details above. Drag the ⇅ handle to reorder."
+msgstr ""
+
+#: includes/class-lset-admin.php:206
+#: includes/class-lset-attendees.php:281
+#: includes/class-lset-attendees.php:312
+#: includes/class-lset-tickets.php:187
+#: includes/class-lset-tickets.php:516
+#: templates/emails/lset-tickets.php:36
+#: templates/emails/plain/lset-tickets.php:32
+msgid "Ticket"
+msgstr ""
+
+#: includes/class-lset-admin.php:207
+msgid "Price"
+msgstr ""
+
+#: includes/class-lset-admin.php:208
+#: includes/class-lset-attendees.php:285
+msgid "Capacity"
+msgstr ""
+
+#: includes/class-lset-admin.php:210
+msgid "Taken"
+msgstr ""
+
+#: includes/class-lset-admin.php:223
+msgid "Add ticket"
+msgstr ""
+
+#: includes/class-lset-admin.php:234
+msgid "e.g. Volunteering"
+msgstr ""
+
+#: includes/class-lset-admin.php:236
+#: includes/class-lset-admin.php:274
+msgid "no limit"
+msgstr ""
+
+#: includes/class-lset-admin.php:237
+msgid "Remove group"
+msgstr ""
+
+#: includes/class-lset-admin.php:263
+msgid "Drag to reorder"
+msgstr ""
+
+#: includes/class-lset-admin.php:268
+msgid "e.g. Years 3-5"
+msgstr ""
+
+#: includes/class-lset-admin.php:269
+msgid "Description (optional)"
+msgstr ""
+
+#: includes/class-lset-admin.php:270
+msgid "Hidden"
+msgstr ""
+
+#: includes/class-lset-admin.php:275
+msgid "Optional. Once this many or fewer are left, buyers see \"Only 3 left\" next to the ticket. Leave blank to never show it."
+msgstr ""
+
+#: includes/class-lset-admin.php:275
+msgid "Say \"only N left\" at"
+msgstr ""
+
+#: includes/class-lset-admin.php:275
+msgid "off"
+msgstr ""
+
+#: includes/class-lset-admin.php:279
+msgid "No group"
+msgstr ""
+
+#: includes/class-lset-admin.php:286
+msgid "Remove ticket"
+msgstr ""
+
+#: includes/class-lset-admin.php:307
+msgid "First and last name for each ticket"
+msgstr ""
+
+#: includes/class-lset-admin.php:309
+#: includes/class-lset-admin.php:322
+msgid "Required"
+msgstr ""
+
+#: includes/class-lset-admin.php:310
+msgid "Optional"
+msgstr ""
+
+#: includes/class-lset-admin.php:311
+msgid "Don't ask"
+msgstr ""
+
+#: includes/class-lset-admin.php:315
+msgid "No checkout fields yet."
+msgstr ""
+
+#: includes/class-lset-admin.php:315
+msgid "Add some"
+msgstr ""
+
+#: includes/class-lset-admin.php:320
+msgid "\"Each ticket\" asks once per ticket bought (e.g. child's class, dietary needs). \"Once per booking\" asks the buyer once (e.g. contact phone)."
+msgstr ""
+
+#: includes/class-lset-admin.php:322
+msgid "Field"
+msgstr ""
+
+#: includes/class-lset-admin.php:322
+msgid "Ask"
+msgstr ""
+
+#: includes/class-lset-admin.php:322
+#: includes/class-lset-attendees.php:318
+#: includes/class-lset-attendees.php:495
+#: includes/class-lset-tickets.php:521
+#: includes/class-lset-tickets.php:670
+msgid "Order"
+msgstr ""
+
+#: includes/class-lset-admin.php:330
+msgid "Not used"
+msgstr ""
+
+#: includes/class-lset-admin.php:331
+msgid "Each ticket"
+msgstr ""
+
+#: includes/class-lset-admin.php:332
+msgid "Once per booking"
+msgstr ""
+
+#: includes/class-lset-admin.php:501
+msgid "Taken / capacity"
+msgstr ""
+
+#: includes/class-lset-admin.php:513
+msgid "Info only"
+msgstr ""
+
+#: includes/class-lset-admin.php:529
+#: includes/class-lset-admin.php:563
+#: includes/class-lset-attendees.php:61
+#: includes/class-lset-attendees.php:230
+msgid "Attendees"
+msgstr ""
+
+#: includes/class-lset-admin.php:560
+msgid "Duplicate for next year"
+msgstr ""
+
+#: includes/class-lset-admin.php:576
+#: includes/class-lset-attendees.php:366
+#: includes/class-lset-events.php:141
+#: includes/class-lset-frontend.php:600
+msgid "Event not found."
+msgstr ""
+
+#: includes/class-lset-admin.php:581
+msgid "Same date next year"
+msgstr ""
+
+#: includes/class-lset-admin.php:582
+msgid "Same weekday next year (52 weeks later)"
+msgstr ""
+
+#. translators: %s: event title
+#: includes/class-lset-admin.php:586
+#, php-format
+msgid "Duplicate \"%s\""
+msgstr ""
+
+#. translators: %s: date
+#: includes/class-lset-admin.php:587
+#, php-format
+msgid "This event starts %s. The copy gets the same tickets, groups and fields, with every date moved, and is saved as a draft with no bookings."
+msgstr ""
+
+#: includes/class-lset-admin.php:595
+msgid "Move by"
+msgstr ""
+
+#: includes/class-lset-admin.php:595
+msgid "days"
+msgstr ""
+
+#: includes/class-lset-admin.php:596
+msgid "Make the copy"
+msgstr ""
+
+#: includes/class-lset-admin.php:606
+#: includes/class-lset-admin.php:694
+#: includes/class-lset-admin.php:715
+#: includes/class-lset-admin.php:885
+#: includes/class-lset-admin.php:943
+msgid "Sorry, you are not allowed to do that."
+msgstr ""
+
+#: includes/class-lset-admin.php:639
+msgid "Text"
+msgstr ""
+
+#: includes/class-lset-admin.php:640
+msgid "Number"
+msgstr ""
+
+#: includes/class-lset-admin.php:641
+msgid "Long text"
+msgstr ""
+
+#: includes/class-lset-admin.php:642
+msgid "Drop-down"
+msgstr ""
+
+#: includes/class-lset-admin.php:643
+msgid "Tick box"
+msgstr ""
+
+#: includes/class-lset-admin.php:648
+msgid "Fields you can ask for on any event. Choose which ones each event uses, and whether they're required, in the event's \"Checkout fields\" box."
+msgstr ""
+
+#: includes/class-lset-admin.php:650
+#: includes/class-lset-admin.php:675
+msgid "Label"
+msgstr ""
+
+#: includes/class-lset-admin.php:650
+#: includes/class-lset-admin.php:676
+msgid "Type"
+msgstr ""
+
+#: includes/class-lset-admin.php:650
+#: includes/class-lset-admin.php:681
+msgid "Options"
+msgstr ""
+
+#: includes/class-lset-admin.php:653
+msgid "No fields yet."
+msgstr ""
+
+#: includes/class-lset-admin.php:661
+msgid "Edit"
+msgstr ""
+
+#: includes/class-lset-admin.php:662
+msgid "Delete this field? Events using it will stop asking for it. Answers already given are kept."
+msgstr ""
+
+#: includes/class-lset-admin.php:662
+msgid "Delete"
+msgstr ""
+
+#: includes/class-lset-admin.php:669
+msgid "Edit field"
+msgstr ""
+
+#: includes/class-lset-admin.php:669
+msgid "Add a field"
+msgstr ""
+
+#: includes/class-lset-admin.php:681
+msgid "For drop-downs: one option per line."
+msgstr ""
+
+#: includes/class-lset-admin.php:682
+msgid "Placeholder"
+msgstr ""
+
+#: includes/class-lset-admin.php:683
+msgid "List order"
+msgstr ""
+
+#: includes/class-lset-admin.php:685
+msgid "Save field"
+msgstr ""
+
+#: includes/class-lset-admin.php:685
+msgid "Add field"
+msgstr ""
+
+#: includes/class-lset-admin.php:735
+msgid "Hold tickets in a basket for"
+msgstr ""
+
+#: includes/class-lset-admin.php:735
+msgid "minutes"
+msgstr ""
+
+#: includes/class-lset-admin.php:736
+msgid "Complete ticket orders"
+msgstr ""
+
+#: includes/class-lset-admin.php:736
+msgid "Mark paid (and free) orders that only hold event tickets as Completed straight away"
+msgstr ""
+
+#: includes/class-lset-admin.php:737
+msgid "Event address"
+msgstr ""
+
+#: includes/class-lset-admin.php:738
+msgid "Event page sidebar"
+msgstr ""
+
+#: includes/class-lset-admin.php:738
+msgid "Show the theme's sidebar on event pages (off: event pages are full width)"
+msgstr ""
+
+#: includes/class-lset-admin.php:739
+msgid "When the plugin is deleted"
+msgstr ""
+
+#: includes/class-lset-admin.php:739
+msgid "Delete all events, tickets, bookings and attendee details. Orders are never touched."
+msgstr ""
+
+#: includes/class-lset-admin.php:743
+msgid "Each person booked gets their own ticket with a QR code. Scanning it with a phone camera opens the ticket; staff who are logged in can check it in there."
+msgstr ""
+
+#: includes/class-lset-admin.php:745
+msgid "Ticket email"
+msgstr ""
+
+#: includes/class-lset-admin.php:745
+msgid "Email tickets to the buyer when an order is paid (or free)"
+msgstr ""
+
+#. translators: %s: link to the WooCommerce email settings
+#: includes/class-lset-admin.php:750
+#, php-format
+msgid "Change the subject, heading and closing text in %s. You can always resend from an order: Order actions → Email event tickets to the customer."
+msgstr ""
+
+#: includes/class-lset-admin.php:751
+msgid "WooCommerce → Settings → Emails → Event tickets"
+msgstr ""
+
+#: includes/class-lset-admin.php:755
+msgid "Ticket colour"
+msgstr ""
+
+#: includes/class-lset-admin.php:756
+msgid "Logo on tickets"
+msgstr ""
+
+#: includes/class-lset-admin.php:756
+msgid "The address of an image from the Media Library. Leave blank to use the site logo."
+msgstr ""
+
+#: includes/class-lset-admin.php:757
+msgid "Printed on every ticket"
+msgstr ""
+
+#: includes/class-lset-admin.php:757
+msgid "e.g. Children must be collected by an adult. Questions? events@example.org"
+msgstr ""
+
+#: includes/class-lset-admin.php:757
+msgid "Each event can add its own line too, under Event details."
+msgstr ""
+
+#: includes/class-lset-admin.php:758
+#: includes/class-lset-attendees.php:274
+msgid "Door check-in"
+msgstr ""
+
+#: includes/class-lset-admin.php:758
+msgid "For typing in a code when a QR code won't scan. Admins and shop managers can check people in; give others the lset_check_in capability (e.g. with the Members plugin)."
+msgstr ""
+
+#: includes/class-lset-admin.php:763
+msgid "Event pages"
+msgstr ""
+
+#: includes/class-lset-admin.php:764
+msgid "Lists of events for your site. Create a page here, or put the shortcode on any page (an Elementor Shortcode widget works too)."
+msgstr ""
+
+#: includes/class-lset-admin.php:766
+msgid "List"
+msgstr ""
+
+#: includes/class-lset-admin.php:766
+msgid "Shortcode"
+msgstr ""
+
+#: includes/class-lset-admin.php:766
+msgid "Page"
+msgstr ""
+
+#: includes/class-lset-admin.php:776
+msgid "edit"
+msgstr ""
+
+#. translators: 1: page address, 2: page title with an edit link
+#: includes/class-lset-admin.php:788
+#, php-format
+msgid "There is already a page at %1$s: %2$s."
+msgstr ""
+
+#: includes/class-lset-admin.php:794
+msgid "Move the existing page to Drafts (its address gets \"-old\" on the end) and put the new list at its address?"
+msgstr ""
+
+#: includes/class-lset-admin.php:795
+msgid "Replace it (move the old page to Drafts)"
+msgstr ""
+
+#. translators: %s: page address such as /events-2
+#: includes/class-lset-admin.php:800
+#, php-format
+msgid "Keep it, create the new page at %s"
+msgstr ""
+
+#. translators: %s: page title
+#: includes/class-lset-admin.php:804
+#, php-format
+msgid "Create \"%s\" page"
+msgstr ""
+
+#: includes/class-lset-admin.php:813
+msgid "Display options"
+msgstr ""
+
+#: includes/class-lset-admin.php:814
+msgid "Add any of these inside the shortcode, e.g."
+msgstr ""
+
+#: includes/class-lset-admin.php:817
+msgid "Cards in a grid (default); one wide row per event with the picture at the side; or a simple list of dates and titles."
+msgstr ""
+
+#: includes/class-lset-admin.php:818
+msgid "Grid only: up to 1–4 cards per row on a wide screen (default 3)."
+msgstr ""
+
+#: includes/class-lset-admin.php:819
+msgid "Show only this many events."
+msgstr ""
+
+#: includes/class-lset-admin.php:820
+msgid "Soonest or newest first. Upcoming lists default to soonest first, past lists to newest first."
+msgstr ""
+
+#: includes/class-lset-admin.php:821
+msgid "Hide the picture, the short description, the venue, the \"from\" price or the Book / More info button."
+msgstr ""
+
+#: includes/class-lset-admin.php:822
+msgid "Only events at this venue."
+msgstr ""
+
+#: includes/class-lset-admin.php:823
+msgid "Only events in that year (handy for a past events archive)."
+msgstr ""
+
+#: includes/class-lset-admin.php:834
+msgid "Upcoming events"
+msgstr ""
+
+#: includes/class-lset-admin.php:835
+#: includes/class-lset-events.php:26
+#: includes/class-lset-events.php:37
+msgid "Events"
+msgstr ""
+
+#: includes/class-lset-admin.php:839
+#: includes/class-lset-admin.php:840
+msgid "Past events"
+msgstr ""
+
+#: includes/class-lset-admin.php:890
+msgid "Unknown list."
+msgstr ""
+
+#: includes/class-lset-admin.php:972
+msgid "Address"
+msgstr ""
+
+#: includes/class-lset-admin.php:973
+msgid "Postcode"
+msgstr ""
+
+#: includes/class-lset-admin.php:974
+msgid "Map link (optional)"
+msgstr ""
+
+#: includes/class-lset-attendees.php:22
+msgid "Booked (paid, free or on hold)"
+msgstr ""
+
+#: includes/class-lset-attendees.php:26
+msgid "Awaiting payment"
+msgstr ""
+
+#: includes/class-lset-attendees.php:30
+msgid "Cancelled, failed or refunded"
+msgstr ""
+
+#: includes/class-lset-attendees.php:34
+msgid "All"
+msgstr ""
+
+#: includes/class-lset-attendees.php:200
+#: includes/class-lset-attendees.php:362
+msgid "Sorry, you are not allowed to see attendee details."
+msgstr ""
+
+#: includes/class-lset-attendees.php:245
+msgid "Show"
+msgstr ""
+
+#: includes/class-lset-attendees.php:249
+msgid "No events yet."
+msgstr ""
+
+#: includes/class-lset-attendees.php:271
+msgid "Download CSV"
+msgstr ""
+
+#: includes/class-lset-attendees.php:272
+msgid "Printable register"
+msgstr ""
+
+#: includes/class-lset-attendees.php:276
+#: includes/class-lset-events.php:30
+msgid "Edit event"
+msgstr ""
+
+#: includes/class-lset-attendees.php:283
+msgid "Booked"
+msgstr ""
+
+#: includes/class-lset-attendees.php:284
+msgid "In baskets / awaiting payment"
+msgstr ""
+
+#: includes/class-lset-attendees.php:290
+msgid "hidden"
+msgstr ""
+
+#. translators: %s: group name
+#: includes/class-lset-attendees.php:299
+#, php-format
+msgid "Group: %s"
+msgstr ""
+
+#. translators: %d: number of attendees
+#. translators: %d: number
+#: includes/class-lset-attendees.php:308
+#: includes/class-lset-attendees.php:471
+#, php-format
+msgid "%d attendee"
+msgid_plural "%d attendees"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-lset-attendees.php:313
+#: includes/class-lset-attendees.php:487
+#: includes/class-lset-frontend.php:169
+msgid "First name"
+msgstr ""
+
+#: includes/class-lset-attendees.php:314
+#: includes/class-lset-attendees.php:487
+#: includes/class-lset-frontend.php:170
+msgid "Last name"
+msgstr ""
+
+#: includes/class-lset-attendees.php:319
+#: includes/class-lset-attendees.php:491
+#: includes/class-lset-tickets.php:669
+msgid "Booked by"
+msgstr ""
+
+#: includes/class-lset-attendees.php:320
+msgid "Email"
+msgstr ""
+
+#: includes/class-lset-attendees.php:321
+#: includes/class-lset-attendees.php:491
+msgid "Phone"
+msgstr ""
+
+#: includes/class-lset-attendees.php:325
+msgid "Status"
+msgstr ""
+
+#: includes/class-lset-attendees.php:326
+msgid "Checked in"
+msgstr ""
+
+#: includes/class-lset-attendees.php:330
+msgid "No attendees for this filter."
+msgstr ""
+
+#: includes/class-lset-attendees.php:347
+msgid "refunded"
+msgstr ""
+
+#: includes/class-lset-attendees.php:453
+msgid "Register"
+msgstr ""
+
+#: includes/class-lset-attendees.php:469
+msgid "Print"
+msgstr ""
+
+#. translators: %s: date and time
+#: includes/class-lset-attendees.php:471
+#, php-format
+msgid "printed %s"
+msgstr ""
+
+#: includes/class-lset-attendees.php:512
+msgid "No attendees yet."
+msgstr ""
+
+#: includes/class-lset-capacity.php:117
+msgid "Lots of people are booking right now. Please try again in a moment."
+msgstr ""
+
+#: includes/class-lset-capacity.php:171
+msgid "That ticket is no longer available."
+msgstr ""
+
+#. translators: %s: ticket or group name
+#: includes/class-lset-capacity.php:213
+#, php-format
+msgid "Sorry, \"%s\" has sold out."
+msgstr ""
+
+#. translators: 1: number left, 2: ticket or group name
+#: includes/class-lset-capacity.php:216
+#, php-format
+msgid "Sorry, there is only %1$d \"%2$s\" ticket left."
+msgid_plural "Sorry, there are only %1$d \"%2$s\" tickets left."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-lset-cart.php:46
+msgid "Please book event tickets from the event page."
+msgstr ""
+
+#: includes/class-lset-cart.php:116
+msgid "Your session timed out. Please try again."
+msgstr ""
+
+#: includes/class-lset-cart.php:128
+msgid "Tickets added to your basket."
+msgstr ""
+
+#: includes/class-lset-cart.php:174
+msgid "Sorry, we couldn't add those tickets to your basket. Please try again."
+msgstr ""
+
+#: includes/class-lset-cart.php:186
+msgid "Bookings for this event are closed."
+msgstr ""
+
+#: includes/class-lset-cart.php:218
+msgid "One of those tickets is no longer available."
+msgstr ""
+
+#. translators: %s: ticket name
+#: includes/class-lset-cart.php:225
+#, php-format
+msgid "\"%s\" isn't on sale yet."
+msgstr ""
+
+#. translators: %s: ticket name
+#: includes/class-lset-cart.php:230
+#, php-format
+msgid "Sales of \"%s\" have ended."
+msgstr ""
+
+#. translators: 1: ticket name, 2: number
+#: includes/class-lset-cart.php:236
+#, php-format
+msgid "%1$s ticket %2$d"
+msgstr ""
+
+#. translators: %s: which ticket
+#: includes/class-lset-cart.php:241
+#, php-format
+msgid "Please enter a first and last name for %s."
+msgstr ""
+
+#: includes/class-lset-cart.php:272
+#: includes/class-lset-frontend.php:179
+msgid "Please choose at least one ticket."
+msgstr ""
+
+#: includes/class-lset-cart.php:282
+#: includes/class-lset-frontend.php:173
+msgid "Yes"
+msgstr ""
+
+#. translators: %s: field label
+#: includes/class-lset-cart.php:285
+#, php-format
+msgid "Please tick \"%s\"."
+msgstr ""
+
+#. translators: %s: field label
+#: includes/class-lset-cart.php:291
+#, php-format
+msgid "\"%s\" must be a number."
+msgstr ""
+
+#. translators: %s: field label
+#: includes/class-lset-cart.php:298
+#, php-format
+msgid "Please choose an option for \"%s\"."
+msgstr ""
+
+#. translators: %s: field label
+#: includes/class-lset-cart.php:310
+#, php-format
+msgid "Please fill in \"%s\"."
+msgstr ""
+
+#. translators: 1: event title, 2: ticket name
+#: includes/class-lset-cart.php:332
+#, php-format
+msgid "%1$s – %2$s"
+msgstr ""
+
+#: includes/class-lset-cart.php:344
+#: includes/class-lset-orders.php:88
+msgid "Date"
+msgstr ""
+
+#. translators: %d: attendee number
+#: includes/class-lset-cart.php:383
+#, php-format
+msgid "Attendee %d"
+msgstr ""
+
+#: includes/class-lset-cart.php:462
+msgid "A ticket in your basket is no longer available. Please remove it."
+msgstr ""
+
+#. translators: %s: ticket name
+#: includes/class-lset-cart.php:468
+#, php-format
+msgid "\"%s\" is no longer on sale. Please remove it from your basket."
+msgstr ""
+
+#. translators: %s: ticket name
+#: includes/class-lset-cart.php:473
+#, php-format
+msgid "The attendee details for \"%s\" don't match the quantity. Please remove it and book again."
+msgstr ""
+
+#: includes/class-lset-cart.php:482
+msgid "Please change your tickets and try again."
+msgstr ""
+
+#: includes/class-lset-email-tickets.php:25
+#: includes/class-lset-tickets.php:382
+msgid "Event tickets"
+msgstr ""
+
+#: includes/class-lset-email-tickets.php:26
+msgid "Sent to the buyer when an order with event tickets is paid (or free). One ticket per person, each with a QR code to scan at the door."
+msgstr ""
+
+#: includes/class-lset-email-tickets.php:38
+msgid "Your tickets for {event}"
+msgstr ""
+
+#: includes/class-lset-email-tickets.php:42
+#: includes/class-lset-tickets.php:554
+msgid "Your tickets"
+msgstr ""
+
+#: includes/class-lset-email-tickets.php:46
+msgid "Show the QR code at the door, on your phone or printed. See you there!"
+msgstr ""
+
+#: includes/class-lset-events.php:27
+#: includes/class-lset-orders.php:87
+msgid "Event"
+msgstr ""
+
+#: includes/class-lset-events.php:28
+msgid "Add event"
+msgstr ""
+
+#: includes/class-lset-events.php:29
+msgid "Add new event"
+msgstr ""
+
+#: includes/class-lset-events.php:31
+msgid "New event"
+msgstr ""
+
+#: includes/class-lset-events.php:32
+msgid "View event"
+msgstr ""
+
+#: includes/class-lset-events.php:33
+msgid "Search events"
+msgstr ""
+
+#: includes/class-lset-events.php:34
+msgid "No events found."
+msgstr ""
+
+#: includes/class-lset-events.php:35
+msgid "No events in the bin."
+msgstr ""
+
+#: includes/class-lset-events.php:36
+msgid "All events"
+msgstr ""
+
+#: includes/class-lset-events.php:73
+msgid "Venues"
+msgstr ""
+
+#: includes/class-lset-events.php:75
+msgid "Add new venue"
+msgstr ""
+
+#: includes/class-lset-events.php:76
+msgid "Edit venue"
+msgstr ""
+
+#: includes/class-lset-events.php:77
+msgid "Search venues"
+msgstr ""
+
+#: includes/class-lset-events.php:78
+msgid "No venues found."
+msgstr ""
+
+#. translators: %1$d: ticket number on the form (1, 2, 3…), %2$s: ticket name.
+#: includes/class-lset-frontend.php:168
+#, php-format
+msgid "Ticket %1$d: %2$s"
+msgstr ""
+
+#: includes/class-lset-frontend.php:171
+msgid "(required)"
+msgstr ""
+
+#: includes/class-lset-frontend.php:172
+#: includes/class-lset-frontend.php:549
+msgid "Choose…"
+msgstr ""
+
+#: includes/class-lset-frontend.php:174
+msgid "Sold out"
+msgstr ""
+
+#. translators: %d: number of tickets left.
+#: includes/class-lset-frontend.php:176
+#, php-format
+msgid "%d left"
+msgstr ""
+
+#: includes/class-lset-frontend.php:177
+msgid "Sales have ended"
+msgstr ""
+
+#: includes/class-lset-frontend.php:178
+msgid "We couldn't check live availability. Please refresh the page."
+msgstr ""
+
+#: includes/class-lset-frontend.php:232
+#: includes/class-lset-frontend.php:498
+msgid "Free"
+msgstr ""
+
+#. translators: %s: price
+#: includes/class-lset-frontend.php:238
+#, php-format
+msgid "From %s"
+msgstr ""
+
+#: includes/class-lset-frontend.php:326
+msgid "No past events yet."
+msgstr ""
+
+#: includes/class-lset-frontend.php:326
+msgid "No events coming up just now. Please check back soon."
+msgstr ""
+
+#: includes/class-lset-frontend.php:339
+msgid "See photos"
+msgstr ""
+
+#: includes/class-lset-frontend.php:342
+msgid "Book"
+msgstr ""
+
+#: includes/class-lset-frontend.php:342
+msgid "More info"
+msgstr ""
+
+#: includes/class-lset-frontend.php:422
+msgid "When"
+msgstr ""
+
+#: includes/class-lset-frontend.php:425
+msgid "Where"
+msgstr ""
+
+#: includes/class-lset-frontend.php:427
+msgid "Map"
+msgstr ""
+
+#: includes/class-lset-frontend.php:442
+msgid "This event has finished."
+msgstr ""
+
+#: includes/class-lset-frontend.php:516
+msgid "About your booking"
+msgstr ""
+
+#: includes/class-lset-frontend.php:528
+msgid "Please turn on JavaScript to book tickets."
+msgstr ""
+
+#: includes/class-lset-frontend.php:529
+msgid "Add to basket"
+msgstr ""
+
+#: includes/class-lset-frontend.php:539
+msgid "required"
+msgstr ""
+
+#. translators: %s: date and time
+#: includes/class-lset-frontend.php:620
+#, php-format
+msgid "Tickets go on sale on %s."
+msgstr ""
+
+#: includes/class-lset-frontend.php:622
+msgid "Bookings for this event are closed or sold out."
+msgstr ""
+
+#. translators: %s: date and time
+#: includes/class-lset-frontend.php:650
+#, php-format
+msgid "On sale from %s"
+msgstr ""
+
+#: includes/class-lset-gallery.php:94
+msgid "Close"
+msgstr ""
+
+#: includes/class-lset-gallery.php:95
+msgid "Previous photo"
+msgstr ""
+
+#: includes/class-lset-gallery.php:96
+msgid "Next photo"
+msgstr ""
+
+#. translators: 1: photo number, 2: number of photos
+#: includes/class-lset-gallery.php:98
+#, php-format
+msgid "Photo %1$d of %2$d"
+msgstr ""
+
+#: includes/class-lset-gallery.php:138
+msgid "Photos"
+msgstr ""
+
+#: includes/class-lset-gallery.php:171
+msgid "These photos are private."
+msgstr ""
+
+#: includes/class-lset-gallery.php:190
+msgid "Event photos"
+msgstr ""
+
+#: includes/class-lset-gallery.php:191
+msgid "Add to gallery"
+msgstr ""
+
+#: includes/class-lset-gallery.php:192
+#: includes/class-lset-gallery.php:211
+msgid "Remove photo"
+msgstr ""
+
+#: includes/class-lset-gallery.php:198
+msgid "Photo gallery"
+msgstr ""
+
+#: includes/class-lset-gallery.php:205
+msgid "Optional. Photos appear at the bottom of the event page once the event has finished. Drag to reorder."
+msgstr ""
+
+#: includes/class-lset-gallery.php:216
+msgid "Add photos"
+msgstr ""
+
+#: includes/class-lset-gallery.php:217
+msgid "Remove all"
+msgstr ""
+
+#: includes/class-lset-install.php:88
+msgid "Every five minutes"
+msgstr ""
+
+#: includes/class-lset-install.php:243
+msgid "Event ticket"
+msgstr ""
+
+#: includes/class-lset-install.php:251
+msgid "Used by Lumaha Simple Event Tickets for every event ticket. Please don't delete or edit it."
+msgstr ""
+
+#: includes/class-lset-orders.php:47
+msgid "EventPrime booking"
+msgstr ""
+
+#. translators: %s: ticket code
+#: includes/class-lset-tickets.php:202
+#, php-format
+msgid "QR code for ticket %s"
+msgstr ""
+
+#: includes/class-lset-tickets.php:227
+msgid "This ticket was already checked in."
+msgstr ""
+
+#: includes/class-lset-tickets.php:243
+msgid "Sorry, you are not allowed to check people in."
+msgstr ""
+
+#. translators: 1: number of tickets, 2: email address
+#: includes/class-lset-tickets.php:313
+#, php-format
+msgid "Event tickets: %1$d ticket with a QR code emailed to %2$s."
+msgid_plural "Event tickets: %1$d tickets with QR codes emailed to %2$s."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-lset-tickets.php:321
+msgid "Event tickets: the ticket email could not be sent. Use \"Email event tickets to the customer\" in Order actions to try again."
+msgstr ""
+
+#: includes/class-lset-tickets.php:341
+msgid "Email event tickets to the customer"
+msgstr ""
+
+#: includes/class-lset-tickets.php:348
+msgid "Event tickets: nothing to send. Tickets go out for paid, free or on-hold bookings only."
+msgstr ""
+
+#. translators: %s: order number
+#: includes/class-lset-tickets.php:360
+#: includes/class-lset-tickets.php:369
+#: templates/emails/lset-tickets.php:25
+msgid "View and print your tickets"
+msgstr ""
+
+#: includes/class-lset-tickets.php:382
+msgid "View tickets"
+msgstr ""
+
+#. translators: %s: date and time
+#: includes/class-lset-tickets.php:385
+#, php-format
+msgid "Emailed %s"
+msgstr ""
+
+#: includes/class-lset-tickets.php:518
+#: templates/emails/lset-tickets.php:38
+#: templates/emails/plain/lset-tickets.php:34
+msgid "Name"
+msgstr ""
+
+#. translators: 1: number, 2: total
+#: includes/class-lset-tickets.php:521
+#: templates/emails/lset-tickets.php:36
+#, php-format
+msgid "%1$d of %2$d"
+msgstr ""
+
+#: includes/class-lset-tickets.php:541
+msgid "Tickets not found"
+msgstr ""
+
+#: includes/class-lset-tickets.php:541
+msgid "This link isn't right. Please use the link in your ticket email."
+msgstr ""
+
+#. translators: %s: order number
+#: includes/class-lset-tickets.php:556
+#, php-format
+msgid "Your tickets for order #%s"
+msgstr ""
+
+#: includes/class-lset-tickets.php:559
+msgid "Print tickets"
+msgstr ""
+
+#: includes/class-lset-tickets.php:560
+msgid "Show the QR code at the door, on your phone or printed. Each person has their own ticket."
+msgstr ""
+
+#: includes/class-lset-tickets.php:563
+msgid "We're still waiting to confirm your payment. Your tickets will be valid once it's through."
+msgstr ""
+
+#: includes/class-lset-tickets.php:571
+msgid "This order hasn't been paid yet, so there are no tickets to show."
+msgstr ""
+
+#: includes/class-lset-tickets.php:573
+msgid "There are no valid tickets on this order."
+msgstr ""
+
+#. translators: %d: number
+#: includes/class-lset-tickets.php:576
+#, php-format
+msgid "%d ticket on this order was cancelled or refunded, so it isn't shown."
+msgid_plural "%d tickets on this order were cancelled or refunded, so they aren't shown."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-lset-tickets.php:588
+#: includes/class-lset-tickets.php:606
+msgid "Ticket not found"
+msgstr ""
+
+#: includes/class-lset-tickets.php:588
+msgid "We couldn't find this ticket. Please check the link in your ticket email."
+msgstr ""
+
+#: includes/class-lset-tickets.php:591
+msgid "Your ticket"
+msgstr ""
+
+#: includes/class-lset-tickets.php:593
+#: includes/class-lset-tickets.php:635
+msgid "Not valid"
+msgstr ""
+
+#: includes/class-lset-tickets.php:593
+msgid "This ticket was cancelled or refunded."
+msgstr ""
+
+#: includes/class-lset-tickets.php:595
+msgid "Not paid yet"
+msgstr ""
+
+#: includes/class-lset-tickets.php:599
+msgid "Staff: log in to check tickets in"
+msgstr ""
+
+#: includes/class-lset-tickets.php:604
+msgid "Check-in"
+msgstr ""
+
+#: includes/class-lset-tickets.php:614
+msgid "Ticket code"
+msgstr ""
+
+#: includes/class-lset-tickets.php:615
+msgid "Type a ticket code"
+msgstr ""
+
+#: includes/class-lset-tickets.php:616
+msgid "Find"
+msgstr ""
+
+#: includes/class-lset-tickets.php:618
+msgid "Scan each QR code with your phone's camera; it opens here. Stay logged in on this phone for the evening."
+msgstr ""
+
+#: includes/class-lset-tickets.php:635
+msgid "This ticket was refunded."
+msgstr ""
+
+#: includes/class-lset-tickets.php:635
+msgid "This booking was cancelled."
+msgstr ""
+
+#: includes/class-lset-tickets.php:637
+msgid "Not paid"
+msgstr ""
+
+#: includes/class-lset-tickets.php:637
+msgid "This order is still waiting for payment."
+msgstr ""
+
+#: includes/class-lset-tickets.php:639
+msgid "Checked in ✓"
+msgstr ""
+
+#. translators: %s: time
+#: includes/class-lset-tickets.php:642
+msgid "Already checked in"
+msgstr ""
+
+#. translators: %s: time
+#: includes/class-lset-tickets.php:642
+#, php-format
+msgid "This ticket was checked in at %s."
+msgstr ""
+
+#: includes/class-lset-tickets.php:644
+msgid "Payment not confirmed"
+msgstr ""
+
+#: includes/class-lset-tickets.php:644
+msgid "The order is on hold (e.g. waiting for a bank transfer). Check before letting them in."
+msgstr ""
+
+#: includes/class-lset-tickets.php:646
+msgid "Valid ticket"
+msgstr ""
+
+#: includes/class-lset-tickets.php:646
+msgid "Check-in undone."
+msgstr ""
+
+#. translators: %s: event date
+#: includes/class-lset-tickets.php:655
+#, php-format
+msgid "Heads up: this ticket is for %s, not today."
+msgstr ""
+
+#: includes/class-lset-tickets.php:665
+msgid "(no name given)"
+msgstr ""
+
+#. translators: 1: number, 2: total
+#: includes/class-lset-tickets.php:670
+#, php-format
+msgid "ticket %1$d of %2$d"
+msgstr ""
+
+#. translators: 1: number, 2: total
+#: includes/class-lset-tickets.php:671
+#: templates/emails/plain/lset-tickets.php:36
+msgid "Code"
+msgstr ""
+
+#: includes/class-lset-tickets.php:690
+msgid "Undo check-in"
+msgstr ""
+
+#: includes/class-lset-tickets.php:692
+msgid "Check in"
+msgstr ""
+
+#. translators: 1: checked in, 2: total tickets, 3: event
+#: includes/class-lset-tickets.php:699
+#, php-format
+msgid "%1$d of %2$d checked in for %3$s."
+msgstr ""
+
+#: includes/class-lset-tickets.php:701
+msgid "Attendee list"
+msgstr ""
+
+#. translators: %s: customer first name
+#: templates/emails/lset-tickets.php:23
+#: templates/emails/plain/lset-tickets.php:21
+#, php-format
+msgid "Hi %s,"
+msgstr ""
+
+#. translators: %s: order number
+#: templates/emails/lset-tickets.php:24
+#, php-format
+msgid "Here is your ticket for order #%s."
+msgid_plural "Here are your tickets for order #%s. Each person has their own QR code."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: ticket code
+#: templates/emails/lset-tickets.php:45
+#, php-format
+msgid "QR code %s"
+msgstr ""
+
+#. translators: %s: order number
+#: templates/emails/plain/lset-tickets.php:23
+#, php-format
+msgid "Your tickets for order #%s. Open this page to show or print them with their QR codes:"
+msgstr ""

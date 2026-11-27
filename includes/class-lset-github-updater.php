@@ -65,7 +65,7 @@ class LSET_GitHub_Updater {
 				'timeout' => 10,
 				'headers' => array(
 					'Accept'     => 'application/vnd.github+json',
-					'User-Agent' => 'LumahaSimpleEventTickets/' . Lumaha_Simple_Event_Tickets::VERSION . '; ' . home_url(),
+					'User-Agent' => 'LumahaSimpleEventTickets/' . LSET_Plugin::VERSION, // No site address: GitHub doesn't need it.
 				),
 			)
 		);

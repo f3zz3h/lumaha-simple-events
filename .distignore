@@ -13,6 +13,7 @@ phpunit.xml.dist
 .wp-env.json
 /docs
 dist/
-
 /dist
 /addons
+phpcs.xml.dist
+/.wordpress-org
