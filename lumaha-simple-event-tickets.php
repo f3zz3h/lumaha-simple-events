@@ -3,7 +3,7 @@
  * Plugin Name:       Lumaha Simple Event Tickets
  * Plugin URI:        https://github.com/f3zz3h/lumaha-simple-events
  * Description:       School events with tickets sold through the normal WooCommerce checkout. Attendee details per ticket, capacity with short holds, and an attendee list, CSV and printable register for the night.
- * Version:           0.2.1
+ * Version:           0.3.0
  * Author:            Lumaha
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -11,6 +11,7 @@
  * Requires PHP:      7.4
  * Requires Plugins:  woocommerce
  * Text Domain:       lumaha-simple-event-tickets
+ * Domain Path:       /languages
  * Update URI:        https://github.com/f3zz3h/lumaha-simple-events
  *
  * How it fits together:
@@ -24,7 +25,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'LSET_VERSION', '0.2.1' );
+define( 'LSET_VERSION', '0.3.0' );
 define( 'LSET_PLUGIN_FILE', __FILE__ );
 define( 'LSET_DIR', __DIR__ . '/' );
 define( 'LSET_URL', plugin_dir_url( __FILE__ ) );
@@ -34,7 +35,7 @@ define( 'LSET_VENUE', 'lset_venue' );
 define( 'LSET_CAP_ATTENDEES', 'lset_view_attendees' );
 define( 'LSET_CAP_CHECKIN', 'lset_check_in' );
 
-// lset-github-updater:start
+// lset-github-updater:start (the WordPress.org build removes this block, the file and the Update URI header; it updates from WordPress.org).
 // Updates from GitHub releases (starts itself), for copies installed from the GitHub release zip.
 if ( file_exists( __DIR__ . '/includes/class-lset-github-updater.php' ) ) {
 	require_once __DIR__ . '/includes/class-lset-github-updater.php';
@@ -56,11 +57,11 @@ require_once LSET_DIR . 'includes/class-lset-qr.php';
 require_once LSET_DIR . 'includes/class-lset-tickets.php';
 
 /**
- * Small entry point. VERSION is read by the release build and the GitHub updater.
+ * Small entry point. VERSION is read by the release build (and the GitHub updater in GitHub copies).
  */
-final class Lumaha_Simple_Event_Tickets {
+final class LSET_Plugin {
 
-	const VERSION = '0.2.1';
+	const VERSION = '0.3.0';
 
 	/** Plugin settings with their defaults. */
 	public static function settings() {
@@ -94,9 +95,39 @@ final class Lumaha_Simple_Event_Tickets {
 		LSET_Orders::init();
 		LSET_Attendees::init();
 		LSET_Tickets::init();
-		add_action( 'init', function () {
-			load_plugin_textdomain( 'lumaha-simple-event-tickets', false, dirname( plugin_basename( LSET_PLUGIN_FILE ) ) . '/languages' );
-		}, 1 );
+		// Translations load on their own (WordPress 4.6+), from translate.wordpress.org.
+	}
+
+	/**
+	 * An array posted by one of the plugin's forms, unslashed and sanitised on receipt: every value
+	 * through sanitize_textarea_field() (plain text, line breaks kept), every key through sanitize_key().
+	 * Callers check the nonce and capability first, then give each value its own stricter sanitiser.
+	 *
+	 * @param string $key The $_POST key.
+	 * @return array
+	 */
+	public static function posted_array( $key ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- callers verify the nonce (see the docblock).
+		if ( ! isset( $_POST[ $key ] ) || ! is_array( $_POST[ $key ] ) ) {
+			return array();
+		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitised by self::clean_array().
+		return self::clean_array( wp_unslash( $_POST[ $key ] ) );
+	}
+
+	/**
+	 * Sanitise a nested array: keys with sanitize_key(), values with sanitize_textarea_field().
+	 *
+	 * @param array $in Unslashed input.
+	 * @return array
+	 */
+	public static function clean_array( array $in ) {
+		$out = array();
+		foreach ( $in as $k => $v ) {
+			$k         = is_int( $k ) ? $k : sanitize_key( $k );
+			$out[ $k ] = is_array( $v ) ? self::clean_array( $v ) : sanitize_textarea_field( (string) $v );
+		}
+		return $out;
 	}
 }
 
@@ -112,6 +143,6 @@ add_action( 'before_woocommerce_init', function () {
 
 add_action( 'plugins_loaded', function () {
 	if ( class_exists( 'WooCommerce' ) ) {
-		Lumaha_Simple_Event_Tickets::init();
+		LSET_Plugin::init();
 	}
 } );

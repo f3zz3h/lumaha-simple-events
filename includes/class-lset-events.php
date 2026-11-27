@@ -16,7 +16,7 @@ class LSET_Events {
 	}
 
 	public static function register() {
-		$slug = sanitize_title( Lumaha_Simple_Event_Tickets::setting( 'event_slug' ) );
+		$slug = sanitize_title( LSET_Plugin::setting( 'event_slug' ) );
 		$slug = $slug ? $slug : 'events';
 
 		register_post_type(

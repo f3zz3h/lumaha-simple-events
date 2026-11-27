@@ -154,6 +154,23 @@ class LSET_Test_Events extends LSET_Test_Case {
 		$this->assertSame( 0, $tickets['Door']['group_id'] );
 	}
 
+	public function test_previous_and_next_ignore_posts_written_at_the_same_moment() {
+		// Imported or migrated events often share one post_date; WordPress 6.9+ breaks such ties by ID.
+		$c = $this->event( '2027-03-01 18:00:00', '2027-03-01 20:00:00' );
+		$a = $this->event( '2027-01-01 18:00:00', '2027-01-01 20:00:00' );
+		$b = $this->event( '2027-02-01 18:00:00', '2027-02-01 20:00:00' );
+		foreach ( array( $a, $b, $c ) as $id ) {
+			wp_update_post( array( 'ID' => $id, 'post_date' => '2020-01-01 00:00:00' ) );
+		}
+
+		$GLOBALS['post'] = get_post( $b );
+		$this->assertSame( $a, get_previous_post()->ID );
+		$this->assertSame( $c, get_next_post()->ID );
+		$GLOBALS['post'] = get_post( $c );
+		$this->assertSame( $b, get_previous_post()->ID );
+		$this->assertSame( '', get_next_post() );
+	}
+
 	public function test_previous_and_next_follow_the_event_date() {
 		// Created out of order: post dates say c, a, b; event dates say a, b, c.
 		$c = $this->event( '2027-03-01 18:00:00', '2027-03-01 20:00:00' );

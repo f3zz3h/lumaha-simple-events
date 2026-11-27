@@ -37,6 +37,28 @@ jobs:
           done < <(find . -name '*.php' -not -path './.git/*' -not -path './vendor/*' -print0)
           exit $status
 
+  wpcs:
+    name: WordPress Coding Standards
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v7
+
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer
+
+      - name: Install PHPCS and the WordPress standards
+        run: composer install --no-interaction --no-progress
+
+      # Rules are in phpcs.xml.dist (escaping, sanitising, nonces, SQL, i18n, PHP 7.4 compatibility).
+      # Errors and warnings both fail the check.
+      - name: WPCS
+        run: vendor/bin/phpcs
+
   phpunit:
     name: PHPUnit (PHP ${{ matrix.php }}, WooCommerce ${{ matrix.wc }})
     runs-on: ubuntu-latest

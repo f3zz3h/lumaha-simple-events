@@ -32,7 +32,18 @@ class LSET_Admin {
 		add_action( 'created_' . LSET_VENUE, array( __CLASS__, 'venue_save' ) );
 		add_action( 'edited_' . LSET_VENUE, array( __CLASS__, 'venue_save' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
+		add_action( 'admin_init', array( __CLASS__, 'privacy_policy' ) );
 		add_filter( 'use_block_editor_for_post_type', array( __CLASS__, 'classic_editor' ), 10, 2 );
+	}
+
+	/** Suggested text for the site's privacy policy (Settings → Privacy → Policy guide). */
+	public static function privacy_policy() {
+		if ( ! function_exists( 'wp_add_privacy_policy_content' ) ) {
+			return;
+		}
+		$text = '<p>' . esc_html__( 'When you book tickets for an event, we keep the names on each ticket and any answers you give at checkout (for example a child\'s class or dietary needs) with your order, so we can make the attendee list and register for the event and check tickets at the door.', 'lumaha-simple-event-tickets' ) . '</p>'
+			. '<p>' . esc_html__( 'Each ticket has a code, shown as a QR code, that lets anyone holding it see that ticket. Event staff can see who has checked in. These details are not sent to anyone else.', 'lumaha-simple-event-tickets' ) . '</p>';
+		wp_add_privacy_policy_content( __( 'Lumaha Simple Event Tickets', 'lumaha-simple-event-tickets' ), wp_kses_post( $text ) );
 	}
 
 	public static function classic_editor( $use, $post_type ) {
@@ -337,7 +348,7 @@ class LSET_Admin {
 		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || wp_is_post_revision( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
-		$in = isset( $_POST['lset'] ) && is_array( $_POST['lset'] ) ? wp_unslash( $_POST['lset'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- each value is sanitised below.
+		$in = LSET_Plugin::posted_array( 'lset' );
 
 		$start = LSET_Time::from_parts( isset( $in['start_date'] ) ? $in['start_date'] : '', isset( $in['start_time'] ) ? $in['start_time'] : '' );
 		$end   = LSET_Time::from_parts( isset( $in['end_date'] ) && $in['end_date'] ? $in['end_date'] : ( isset( $in['start_date'] ) ? $in['start_date'] : '' ), isset( $in['end_time'] ) ? $in['end_time'] : '' );
@@ -360,7 +371,7 @@ class LSET_Admin {
 		wp_set_object_terms( $post_id, $venue ? array( $venue ) : array(), LSET_VENUE );
 
 		// Fields.
-		$picked = isset( $_POST['lset_fields'] ) && is_array( $_POST['lset_fields'] ) ? wp_unslash( $_POST['lset_fields'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$picked = LSET_Plugin::posted_array( 'lset_fields' );
 		$levels = array(
 			'attendee' => array(),
 			'booking'  => array(),
@@ -387,7 +398,7 @@ class LSET_Admin {
 
 		// Groups first, so tickets can point at new ones. Keys are group ids, or "n1", "n2"… for new rows.
 		$existing_groups = LSET_Store::groups( $post_id );
-		$group_in        = isset( $_POST['lset_groups'] ) && is_array( $_POST['lset_groups'] ) ? wp_unslash( $_POST['lset_groups'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$group_in        = LSET_Plugin::posted_array( 'lset_groups' );
 		$group_map       = array(); // Form key => group id (0 = deleted or blank).
 		$g_order         = 0;
 		foreach ( $group_in as $key => $g ) {
@@ -420,7 +431,7 @@ class LSET_Admin {
 		}
 
 		// Tickets, in the order they appear on the form.
-		$tickets_in = isset( $_POST['lset_tickets'] ) && is_array( $_POST['lset_tickets'] ) ? wp_unslash( $_POST['lset_tickets'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$tickets_in = LSET_Plugin::posted_array( 'lset_tickets' );
 		$existing   = LSET_Store::tickets( $post_id );
 		$order      = 0;
 		foreach ( $tickets_in as $key => $t ) {
@@ -713,7 +724,7 @@ class LSET_Admin {
 	 * ------------------------------------------------------------------ */
 
 	public static function settings_page() {
-		$s = Lumaha_Simple_Event_Tickets::settings();
+		$s = LSET_Plugin::settings();
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Event settings', 'lumaha-simple-event-tickets' ); ?></h1>
@@ -931,7 +942,7 @@ class LSET_Admin {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_die( esc_html__( 'Sorry, you are not allowed to do that.', 'lumaha-simple-event-tickets' ) );
 		}
-		$old  = Lumaha_Simple_Event_Tickets::settings();
+		$old  = LSET_Plugin::settings();
 		$slug = isset( $_POST['event_slug'] ) ? sanitize_title( wp_unslash( $_POST['event_slug'] ) ) : 'events';
 		$new  = array(
 			'hold_minutes'     => isset( $_POST['hold_minutes'] ) ? min( 120, max( 1, (int) $_POST['hold_minutes'] ) ) : 15,

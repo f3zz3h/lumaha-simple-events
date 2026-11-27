@@ -69,40 +69,34 @@ class LSET_Cart {
 	private static function read_post() {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- checked in handle_add (logged-in) / not needed for guests, as with Woo's own add to cart.
 		$qty = array();
-		if ( isset( $_POST['lset_qty'] ) && is_array( $_POST['lset_qty'] ) ) {
-			foreach ( wp_unslash( $_POST['lset_qty'] ) as $tid => $n ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				$qty[ absint( $tid ) ] = absint( $n );
-			}
+		foreach ( LSET_Plugin::posted_array( 'lset_qty' ) as $tid => $n ) {
+			$qty[ absint( $tid ) ] = absint( $n );
 		}
 		$att = array();
-		if ( isset( $_POST['lset_att'] ) && is_array( $_POST['lset_att'] ) ) {
-			foreach ( wp_unslash( $_POST['lset_att'] ) as $tid => $people ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				if ( ! is_array( $people ) ) {
+		foreach ( LSET_Plugin::posted_array( 'lset_att' ) as $tid => $people ) {
+			if ( ! is_array( $people ) ) {
+				continue;
+			}
+			foreach ( $people as $n => $p ) {
+				if ( ! is_array( $p ) ) {
 					continue;
 				}
-				foreach ( $people as $n => $p ) {
-					if ( ! is_array( $p ) ) {
-						continue;
+				$row = array(
+					'first_name' => isset( $p['first_name'] ) ? sanitize_text_field( $p['first_name'] ) : '',
+					'last_name'  => isset( $p['last_name'] ) ? sanitize_text_field( $p['last_name'] ) : '',
+					'fields'     => array(),
+				);
+				if ( isset( $p['f'] ) && is_array( $p['f'] ) ) {
+					foreach ( $p['f'] as $fid => $v ) {
+						$row['fields'][ absint( $fid ) ] = sanitize_textarea_field( is_array( $v ) ? '' : $v );
 					}
-					$row = array(
-						'first_name' => isset( $p['first_name'] ) ? sanitize_text_field( $p['first_name'] ) : '',
-						'last_name'  => isset( $p['last_name'] ) ? sanitize_text_field( $p['last_name'] ) : '',
-						'fields'     => array(),
-					);
-					if ( isset( $p['f'] ) && is_array( $p['f'] ) ) {
-						foreach ( $p['f'] as $fid => $v ) {
-							$row['fields'][ absint( $fid ) ] = sanitize_textarea_field( is_array( $v ) ? '' : $v );
-						}
-					}
-					$att[ absint( $tid ) ][ absint( $n ) ] = $row;
 				}
+				$att[ absint( $tid ) ][ absint( $n ) ] = $row;
 			}
 		}
 		$book = array();
-		if ( isset( $_POST['lset_book'] ) && is_array( $_POST['lset_book'] ) ) {
-			foreach ( wp_unslash( $_POST['lset_book'] ) as $fid => $v ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				$book[ absint( $fid ) ] = sanitize_textarea_field( is_array( $v ) ? '' : $v );
-			}
+		foreach ( LSET_Plugin::posted_array( 'lset_book' ) as $fid => $v ) {
+			$book[ absint( $fid ) ] = sanitize_textarea_field( is_array( $v ) ? '' : $v );
 		}
 		// phpcs:enable
 		return array(

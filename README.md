@@ -42,7 +42,8 @@ WordPress and WooCommerce, no build step, no licence server.
   drag to reorder. They appear at the bottom of the event page once the event has finished, with a
   full-screen viewer, and the event's card on the Past events list says **See photos**.
 - Old EventPrime links (`/events/?event=123`) redirect to the migrated event.
-- Updates come from this repo's GitHub releases.
+- Copies installed from this repo's release zip update from its GitHub releases. The WordPress.org
+  build (below) has no GitHub updater and updates from WordPress.org instead.
 
 ## Shortcodes
 
@@ -143,11 +144,42 @@ vendor/bin/phpunit
 
 GitHub Actions runs them on every pull request (PHP 8.3 + latest WooCommerce, PHP 7.4 + an older one).
 
+### Coding standards and Plugin Check
+
+`vendor/bin/phpcs` checks escaping, sanitising, nonces, SQL, translations and PHP 7.4 compatibility
+(rules in `phpcs.xml.dist`; warnings fail too). GitHub Actions runs it on every pull request.
+
+Before a WordPress.org release, also run [Plugin Check](https://wordpress.org/plugins/plugin-check/)
+on the WordPress.org build: `bash .github/scripts/build-zip.sh --wporg`, copy
+`dist/wporg/lumaha-simple-event-tickets` into a test site's plugins folder and run
+`wp plugin check lumaha-simple-event-tickets`. It should report no errors. The warnings left are
+direct queries on the plugin's own tables and table names in SQL (they come from `$wpdb->prefix`).
+
 ### Releases
 
-Bump the version in the plugin header, `LSET_VERSION` and `Lumaha_Simple_Event_Tickets::VERSION`,
-then push a tag like `v0.2.0`. The Release workflow builds the zip and publishes it; sites see the update
-in Dashboard → Updates.
+Bump the version in the plugin header, `LSET_VERSION`, `LSET_Plugin::VERSION` and readme.txt's
+`Stable tag` (the build fails if they differ), add a changelog entry to readme.txt, then push a tag like
+`v0.3.0`. The Release workflow builds the zips and publishes them; sites installed from GitHub see the
+update in Dashboard → Updates.
+
+Each release has three zips:
+
+- `lumaha-simple-event-tickets-<version>.zip`: the GitHub build, which updates itself from GitHub releases.
+- `lumaha-simple-event-tickets-<version>-wporg.zip`: the WordPress.org build. Same folder name, but without
+  the GitHub update checker, the `Update URI` header and README.md (WordPress.org plugins may only update
+  from WordPress.org). This is the zip to submit for review. `build-zip.sh --wporg` fails if anything about
+  the updater is left in it.
+- `lumaha-set-eventprime-migrator-<version>.zip`: the one-off EventPrime migrator (not on WordPress.org).
+
+### WordPress.org
+
+- Slug and text domain: `lumaha-simple-event-tickets`, the same as the plugin folder, so a site can move
+  from the GitHub build to the WordPress.org one by deleting and reinstalling without losing data (data is
+  only removed on delete if *When the plugin is deleted* is ticked in Settings).
+- readme.txt is the WordPress.org page. The upgrade notice must stay under 300 characters.
+- `languages/lumaha-simple-event-tickets.pot` is the translation template (refreshed by the build when
+  WP-CLI is installed). Translations themselves come from translate.wordpress.org.
+- Listing images (banner, icon, screenshots) go in `.wordpress-org/`, which isn't shipped in the plugin.
 
 ## Licence
 

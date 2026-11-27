@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 
 $lset_accent = LSET_Tickets::accent();
 
-do_action( 'woocommerce_email_header', $email_heading, $email );
+do_action( 'woocommerce_email_header', $email_heading, $email ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WooCommerce's own email hook.
 ?>
 
 <?php /* translators: %s: customer first name */ ?>
@@ -54,4 +54,4 @@ if ( $additional_content ) {
 	echo wp_kses_post( wpautop( wptexturize( $additional_content ) ) );
 }
 
-do_action( 'woocommerce_email_footer', $email );
+do_action( 'woocommerce_email_footer', $email ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WooCommerce's own email hook.

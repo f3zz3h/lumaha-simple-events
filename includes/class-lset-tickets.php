@@ -89,7 +89,7 @@ class LSET_Tickets {
 		global $wpdb;
 		$a   = LSET_Install::table( 'attendees' );
 		$b   = LSET_Install::table( 'bookings' );
-		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT a.id FROM $a a JOIN $b b ON b.id = a.booking_id WHERE a.ticket_code = '' AND $where_sql", $args ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT a.id FROM $a a JOIN $b b ON b.id = a.booking_id WHERE a.ticket_code = '' AND $where_sql", $args ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $where_sql is a fixed condition from this class with its own placeholders (e.g. 'b.order_id = %d').
 		foreach ( $ids as $id ) {
 			$wpdb->update( $a, array( 'ticket_code' => self::new_code() ), array( 'id' => (int) $id ) );
 		}
@@ -174,7 +174,7 @@ class LSET_Tickets {
 		$e    = $events[ $eid ];
 		$t    = $tickets[ $tid ];
 		$name = trim( $r['first_name'] . ' ' . $r['last_name'] );
-		$note = trim( (string) Lumaha_Simple_Event_Tickets::setting( 'ticket_note' ) );
+		$note = trim( (string) LSET_Plugin::setting( 'ticket_note' ) );
 		return array(
 			'id'           => (int) $r['id'],
 			'code'         => $r['ticket_code'],
@@ -259,7 +259,7 @@ class LSET_Tickets {
 
 	public static function status_changed( $order_id, $from, $to, $order = null ) {
 		unset( $from );
-		if ( ! in_array( $to, self::SEND_ON, true ) || ! Lumaha_Simple_Event_Tickets::setting( 'ticket_emails' ) ) {
+		if ( ! in_array( $to, self::SEND_ON, true ) || ! LSET_Plugin::setting( 'ticket_emails' ) ) {
 			return;
 		}
 		$order = $order instanceof WC_Order ? $order : wc_get_order( $order_id );
@@ -405,13 +405,13 @@ class LSET_Tickets {
 	}
 
 	public static function accent() {
-		$c = sanitize_hex_color( (string) Lumaha_Simple_Event_Tickets::setting( 'ticket_colour' ) );
+		$c = sanitize_hex_color( (string) LSET_Plugin::setting( 'ticket_colour' ) );
 		return $c ? $c : '#1d3557';
 	}
 
 	/** The logo for tickets: the one in settings, else the site logo. */
 	public static function logo_url() {
-		$url = (string) Lumaha_Simple_Event_Tickets::setting( 'ticket_logo' );
+		$url = (string) LSET_Plugin::setting( 'ticket_logo' );
 		if ( ! $url && get_theme_mod( 'custom_logo' ) ) {
 			$url = (string) wp_get_attachment_image_url( (int) get_theme_mod( 'custom_logo' ), 'medium' );
 		}

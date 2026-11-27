@@ -116,7 +116,7 @@ class LSET_Orders {
 
 	/** Orders that only hold event tickets skip "Processing". */
 	public static function auto_complete( $status, $order_id, $order = null ) {
-		if ( ! Lumaha_Simple_Event_Tickets::setting( 'auto_complete' ) ) {
+		if ( ! LSET_Plugin::setting( 'auto_complete' ) ) {
 			return $status;
 		}
 		$order = $order instanceof WC_Order ? $order : wc_get_order( $order_id );
@@ -242,7 +242,7 @@ class LSET_Orders {
 
 		// Ticket lines removed from the order by an admin.
 		$placeholders = $seen ? implode( ',', array_fill( 0, count( $seen ), '%d' ) ) : '0';
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- one %d per id in $seen, passed in the array.
 		$wpdb->query( $wpdb->prepare( "UPDATE $table SET status = 'removed', updated_at = %s WHERE order_id = %d AND source IN ('checkout','manual') AND order_item_id NOT IN ($placeholders)", array_merge( array( $now, $order->get_id() ), $seen ) ) );
 
 		// Bookings copied from EventPrime follow their order: status, and refunds on their own line.

@@ -1,0 +1,30 @@
+const { chromium } = require('playwright');
+(async () => {
+  const [out, ev, code] = process.argv.slice(2);
+  const b = await chromium.launch();
+  const B = 'http://localhost:8080';
+  const front = await (await b.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
+  await front.goto(B + '/events/winter-disco/'); await front.waitForTimeout(1500);
+  // Twenty Twenty-Five's single template prints "Written by … in …" (blank for events): hide that theme line.
+  await front.evaluate(() => { for (const p of document.querySelectorAll('main p')) { if (/^Written by/.test(p.textContent.trim())) (p.closest('.wp-block-group') || p).style.display='none'; } });
+  const box = await front.locator('#lset-book').boundingBox();
+  const top = await front.locator('h1').first().boundingBox();
+  await front.screenshot({ path: out + '/screenshot-1.png', clip: { x: 0, y: top.y - 40, width: 1280, height: box.y + box.height + 40 - (top.y - 40) }, fullPage: true });
+  await front.goto(B + '/events/'); await front.waitForTimeout(800);
+  await front.screenshot({ path: out + '/screenshot-2.png', clip: { x: 0, y: 0, width: 1280, height: 860 } });
+  const ctx = await b.newContext({ viewport: { width: 1440, height: 1000 } });
+  const p = await ctx.newPage();
+  await p.goto(B + '/wp-login.php'); await p.fill('#user_login', 'a'); await p.fill('#user_pass', 'a'); await p.click('#wp-submit'); await p.waitForLoadState();
+  await p.goto(B + '/wp-admin/post.php?post=' + ev + '&action=edit'); await p.waitForTimeout(1500);
+  const d = await p.locator('#lset-details').boundingBox(); const t = await p.locator('#lset-tickets').boundingBox();
+  await p.screenshot({ path: out + '/screenshot-3.png', clip: { x: d.x - 12, y: d.y - 12, width: d.width + 24, height: t.y + t.height - d.y + 24 }, fullPage: true });
+  await p.goto(B + '/wp-admin/edit.php?post_type=lset_event&page=lset-attendees&event=' + ev); await p.waitForTimeout(800);
+  await p.screenshot({ path: out + '/screenshot-4.png' });
+  const m = await (await b.newContext({ viewport: { width: 1280, height: 900 }, storageState: await ctx.storageState() })).newPage();
+  const buyer = await (await b.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
+  await buyer.goto('http://localhost:8080/?lset_tickets=27&key=wc_order_gIXjBbDziTMbK'); await buyer.waitForTimeout(800);
+  await buyer.screenshot({ path: out + '/screenshot-5.png', fullPage: true });
+  await m.goto(B + '/?lset_t=' + code); await m.waitForTimeout(800);
+  await m.screenshot({ path: out + '/screenshot-6.png', clip: { x: 0, y: 0, width: 1280, height: 780 } });
+  await b.close();
+})();
