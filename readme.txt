@@ -85,7 +85,8 @@ No. The plugin makes no requests to other sites. QR codes are drawn by the plugi
 2. The list of upcoming events.
 3. Editing an event: details, ticket groups and tickets.
 4. The attendee list for an event, with the printable register and CSV download.
-5. A ticket with its QR code, and the check-in screen staff see when they scan it.
+5. The buyer's tickets page: one ticket with a QR code for each person.
+6. What staff see when they scan a ticket at the door.
 
 == Changelog ==
 
@@ -95,6 +96,7 @@ No. The plugin makes no requests to other sites. QR codes are drawn by the plugi
 * The availability REST route has its own permission check (still public, as the event page is); the `lset_rest_can_read` filter can close it.
 * Translators' notes for strings with placeholders.
 * A suggested privacy policy section, under Settings → Privacy.
+* Fix: on WordPress 6.9 and later, the previous and next event links could skip to the wrong event when events were created at the same moment (for example by an import).
 
 = 0.2.1 =
 * Event pages: when a page already uses the events address, choose to replace it or keep it.

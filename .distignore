@@ -17,3 +17,4 @@ dist/
 /addons
 phpcs.xml.dist
 /.wordpress-org
+.phpunit.result.cache

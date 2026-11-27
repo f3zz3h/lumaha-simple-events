@@ -60,7 +60,12 @@ class LSET_Frontend {
 			$start,
 			$post->ID
 		);
-		return preg_replace( "/p\.post_date [<>] '[^']*'/", $cond, $where, 1 );
+		// WordPress 6.9+ adds a tie-break on the ID for posts written at the same moment
+		// ("(p.post_date < '…' OR (p.post_date = '…' AND p.ID < 12))"); replace that whole group,
+		// or posts saved in the same second (an import, a migration) would all count as adjacent.
+		$count = 0;
+		$where = preg_replace( "/\(p\.post_date [<>] '[^']*' OR \(p\.post_date = '[^']*' AND p\.ID [<>] \d+\)\)/", $cond, $where, 1, $count );
+		return $count ? $where : preg_replace( "/p\.post_date [<>] '[^']*'/", $cond, $where, 1 );
 	}
 
 	public static function adjacent_sort( $sort, $post = null, $order = '' ) {
